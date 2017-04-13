@@ -145,8 +145,10 @@ public abstract class Transfer<E> {
      * 包括表的主键、自增列、只读列
      * */
     private void init(Class<E> eClass,String table) {
-        if((this.dsFlag?this.dataSource:DataBase.ds)==null){
-            System.out.println("no dataSource in Transfer"+ eClass.getName());
+        this.dataSource=this.dsFlag?this.dataSource:DataBase.ds;
+        if(this.dataSource==null){
+            if (this.dsFlag)
+                System.out.println("no dataSource in Transfer"+ eClass.getName());
             return;
         }
         this.eClass=eClass;
