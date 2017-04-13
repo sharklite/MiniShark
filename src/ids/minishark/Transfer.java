@@ -19,7 +19,8 @@ public abstract class Transfer<E> {
     String delete_one;
     private String select_all;
 
-    private DataSource dataSource=DataBase.ds;
+    private boolean dsFlag=false;
+    private DataSource dataSource;
 
     public DataSource getDataSource() {
         return dataSource;
@@ -27,6 +28,7 @@ public abstract class Transfer<E> {
 
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
+        this.dsFlag=true;
         this.init(this.eClass,this.tableName);
     }
 
@@ -143,8 +145,10 @@ public abstract class Transfer<E> {
      * 包括表的主键、自增列、只读列
      * */
     private void init(Class<E> eClass,String table) {
-        if(this.dataSource==null)
+        if((this.dsFlag?this.dataSource:DataBase.ds)==null){
+            System.out.println("no dataSource in Transfer"+ eClass.getName());
             return;
+        }
         this.eClass=eClass;
         //通过构造器或注解传入对应的数据库表，以注解传入的表为准
         this.tableName=table;
