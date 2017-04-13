@@ -15,7 +15,7 @@ final class ColumnInformation {
     String autoIncrement;
     Set<String> primaryKeys;
 
-    Connection connection;
+    private Connection connection;
 
     /**
      * @param tableName  the table name in database

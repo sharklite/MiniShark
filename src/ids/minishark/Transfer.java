@@ -251,7 +251,7 @@ public abstract class Transfer<E> {
         this.entity=e;
         List<E> l=new ArrayList<>();
         l.add(e);
-        this.modify(l);
+        this.insert(l);
     }
     public void insert(Collection<E> connection){
         BatchExecutor.insertBatch(connection,this,getConnection());
@@ -470,7 +470,6 @@ public abstract class Transfer<E> {
         }
         return number;
     }
-
 
     //return java.util.Date
     protected Date tryDate(String preparedSql, Object ...supportedSQLArg){

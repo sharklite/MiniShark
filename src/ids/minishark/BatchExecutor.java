@@ -121,16 +121,22 @@ final class BatchExecutor {
                 conn.commit();
                 if(transfer.autoIncrementCol!=null){
                     rsAuto = pst.getGeneratedKeys();
-                    if(rsAuto.next()) {
-                        long auto=rsAuto.getLong(transfer.autoIncrementCol);
-                        Field field=transfer.fields.get(transfer.colFieldMapper.get(transfer.autoIncrementCol));
-                        if(field!=null){
-                            Class fieldType=field.getType();
-                            if(fieldType.equals(Long.class)||fieldType.equals(long.class))
-                                transfer.setFieldValue(transfer.colFieldMapper.get(transfer.autoIncrementCol),auto);
-                            else
-                                transfer.setFieldValue(transfer.colFieldMapper.get(transfer.autoIncrementCol),(int)auto);
+                    Object o=rsAuto.getObject(1);
+                    Field field=transfer.fields.get(transfer.colFieldMapper.get(transfer.autoIncrementCol));
+                    if(field!=null){
+                        Class fieldType=field.getType();
+                        if(o instanceof Number){
+                            Number number=(Number)o;
+                            if(fieldType.equals(int.class)||fieldType.equals(Integer.class))
+                                o=number.intValue();
+                            else if(fieldType.equals(long.class)||fieldType.equals(Long.class))
+                                o=number.longValue();
+                            else if(fieldType.equals(short.class)||fieldType.equals(Short.class))
+                                o=number.shortValue();
+                            else if(fieldType.equals(byte.class)||fieldType.equals(Byte.class))
+                                o=number.byteValue();
                         }
+                        transfer.setFieldValue(transfer.colFieldMapper.get(transfer.autoIncrementCol),o);
                     }
                     DataBase.close(rsAuto);
                 }
@@ -149,5 +155,6 @@ final class BatchExecutor {
             DataBase.close(conn);
         }
     }
+
 
 }
