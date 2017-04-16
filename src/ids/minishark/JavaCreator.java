@@ -62,10 +62,7 @@ public final class JavaCreator {
             if(!s.contains("java.lang") && !s.contains("[") && !s.contains("java.sql."))
                 builder.append("import ").append(s).append(";\n");
         }
-        builder.append("import ").append("ids.minishark.annotation.Column;\n");
-        builder.append("import ").append("ids.minishark.annotation.JdbcType;\n");
-        builder.append("import ").append("ids.minishark.annotation.ReadOnly;\n");
-        builder.append("import ").append("ids.minishark.annotation.Table;\n");
+        builder.append("import ").append("ids.minishark.annotation.*;\n");
         builder.append("import ").append("java.sql.*;\n");
         builder.append("\n");
         return builder;
