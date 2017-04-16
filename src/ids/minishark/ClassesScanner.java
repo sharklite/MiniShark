@@ -20,11 +20,9 @@ class ClassesScanner {
         // 获取包的名字 并进行替换
         packageName=packageName.replace(".*","");
         String packageDirName = packageName.replace('.', '/');
-        // 定义一个枚举的集合 并进行循环来处理这个目录下的things
         Enumeration<URL> dirs;
         try {
             dirs = Thread.currentThread().getContextClassLoader().getResources(packageDirName);
-            // 循环迭代下去
             while (dirs.hasMoreElements()) {
                 // 获取下一个元素
                 URL url = dirs.nextElement();
@@ -101,9 +99,7 @@ class ClassesScanner {
 
 
     private static void findClassesInPackage(String packageName,String packagePath,Set<Class<?>> classes){
-        // 获取此包的目录 建立一个File
         File dir = new File(packagePath);
-        // 如果不存在或者 也不是目录就直接返回
         if (!dir.exists() || !dir.isDirectory()) {
             return;
         }
@@ -134,12 +130,4 @@ class ClassesScanner {
         }
     }
 
-    public static void main(String[] args){
-//        Set<Class<?>> set=ClassesScanner.getClasses("com.microsoft.*");
-        Set<Class<?>> set=ClassesScanner.getClasses("test");
-        for(Class<?> c:set){
-            System.out.println(c+" , "+c.getCanonicalName());
-        }
-        System.out.println(" ------------- ");
-    }
 }

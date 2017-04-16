@@ -10,16 +10,13 @@ import java.util.*;
 
 public class DataBase {
 
-    private String[] classLocations;
-
     static final Hashtable<Class<?>,DataSource> CONFIG_DS=new Hashtable<>();
 
     static DataSource defaultDS;
     static int batch = 1024;
     private DataSource ds;
 
-    public DataBase(DataSource dataSource,int batch){
-        DataBase.batch=batch;
+    public DataBase(DataSource dataSource){
         this.ds=DataBase.defaultDS=dataSource;
     }
 
