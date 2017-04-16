@@ -6,15 +6,33 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.*;
 
 public class DataBase {
 
-    static DataSource ds;
-    static int batch=512;
+    private String[] classLocations;
+
+    static final Hashtable<Class<?>,DataSource> CONFIG_DS=new Hashtable<>();
+
+    static DataSource defaultDS;
+    static int batch = 1024;
+    private DataSource ds;
 
     public DataBase(DataSource dataSource,int batch){
         DataBase.batch=batch;
-        DataBase.ds=dataSource;
+        this.ds=DataBase.defaultDS=dataSource;
+    }
+
+    public void classLocationsConfig(String[] packageName){
+        Set<Class<?>> set= new HashSet<>();
+        for (String s:packageName){
+            set.addAll(ClassesScanner.getClasses(s));
+        }
+        for(Class key:set){
+            if(ITransfer.class.isAssignableFrom(key))
+                CONFIG_DS.put(key,this.ds);
+        }
+        set.clear();
     }
 
     public static void defaultBatch(int batch){
@@ -22,9 +40,8 @@ public class DataBase {
     }
 
     public static void defaultDataSource(DataSource dataSource){
-        ds=dataSource;
+        defaultDS=dataSource;
     }
-
 
     static void close(Connection c){
         try{

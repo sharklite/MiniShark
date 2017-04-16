@@ -1,7 +1,6 @@
 package ids.minishark;
 
 import ids.minishark.annotation.*;
-
 import javax.sql.DataSource;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -11,7 +10,7 @@ import java.sql.Connection;
 import java.util.*;
 
 
-public abstract class Transfer<E> {
+public abstract class Transfer<E> implements ITransfer{
 
     String select_one;
     String insert_one;
@@ -145,10 +144,18 @@ public abstract class Transfer<E> {
      * 包括表的主键、自增列、只读列
      * */
     private void init(Class<E> eClass,String table) {
-        this.dataSource=this.dsFlag?this.dataSource:DataBase.ds;
+        if(!this.dsFlag){
+            this.dataSource=DataBase.defaultDS;
+        }else {
+            Class<?> key=this.getClass();
+            if(DataBase.CONFIG_DS.containsKey(key)){
+                this.dataSource=DataBase.CONFIG_DS.get(key);
+                this.dsFlag=true;
+            }
+        }
         if(this.dataSource==null){
             if (this.dsFlag)
-                System.out.println("no dataSource in Transfer"+ eClass.getName());
+                System.out.println("no dataSource in Transfer<"+ eClass.getName()+">");
             return;
         }
         this.eClass=eClass;
@@ -221,6 +228,7 @@ public abstract class Transfer<E> {
         this.queryOneBuilder(e);
         this.insertOneBuilder(e);
         this.select_all="Select "+ this.allColumnLabels+" From "+this.tableName;
+
     }
 
     /**
