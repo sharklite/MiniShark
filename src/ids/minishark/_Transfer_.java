@@ -39,7 +39,8 @@ import java.util.*;
                 T entity= beanClass.newInstance();
                 for(String label:set){
                     Object value=rs.getObject(label);
-                    stringFieldMap.get(label).set(entity,value);
+                    if(value!=null)
+                        stringFieldMap.get(label).set(entity,value);
                 }
                 list.add(entity);
             }

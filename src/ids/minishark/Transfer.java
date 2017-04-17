@@ -237,7 +237,8 @@ public abstract class Transfer<E> implements ITransfer{
      * */
     void setFieldValue(String field, Object value){
         try {
-            fields.get(field).set(this.entity,value);
+            if(value!=null)
+                fields.get(field).set(this.entity,value);
         } catch (IllegalAccessException e) {
             System.out.println(this.eClass.getName()+" set value of "+field+" error.");
             e.printStackTrace();
@@ -423,7 +424,6 @@ public abstract class Transfer<E> implements ITransfer{
         }
         return list;
     }
-
     protected int executeUpdate(String preparedSql,Object...supportedSQLArg){
         return _Transfer_.executeUpdate(getConnection(),preparedSql,supportedSQLArg);
     }
@@ -484,7 +484,6 @@ public abstract class Transfer<E> implements ITransfer{
         }
         return number;
     }
-    //return java.util.Date
     protected Date tryDate(String preparedSql, Object ...supportedSQLArg){
         Object object=this.getObject(preparedSql,supportedSQLArg);
         if(object instanceof Date){
