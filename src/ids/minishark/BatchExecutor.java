@@ -12,10 +12,11 @@ final class BatchExecutor {
 
     }
 
-    static <T> List<T> queryBatch(Collection<T> collection,Transfer<T> transfer,Connection conn){
+    static <T> List<T> queryBatch(Collection<T> collection,Transfer<T> transfer){
         List<T> list=new ArrayList<>();
         if(collection.size()==0||transfer.primaryKeys.size()==0)
             return list;
+        Connection conn=transfer.getConnection();
         try {
             for(T entity:collection){
                 List<Object> values=transfer.queryOneBuilder(entity);
@@ -41,9 +42,10 @@ final class BatchExecutor {
         return list;
      }
 
-    static <T> void modifyBatch(Collection<T> collection,Transfer<T> transfer,Connection conn){
+    static <T> void modifyBatch(Collection<T> collection,Transfer<T> transfer){
          if(collection.size()==0||transfer.primaryKeys.size()==0)
              return;
+        Connection conn=transfer.getConnection();
          PreparedStatement pst =null;
          try {
              pst = conn.prepareStatement(transfer.modify_one);
@@ -74,9 +76,10 @@ final class BatchExecutor {
          }
      }
 
-    static <T> void deleteBatch(Collection<T> collection,Transfer<T> transfer,Connection conn){
+    static <T> void deleteBatch(Collection<T> collection,Transfer<T> transfer){
          if(collection.size()==0||transfer.primaryKeys.size()==0)
              return;
+        Connection conn=transfer.getConnection();
          PreparedStatement pst =null;
          try {
              pst = conn.prepareStatement(transfer.delete_one);
@@ -107,9 +110,10 @@ final class BatchExecutor {
          }
      }
 
-    static <T> void insertBatch(Collection<T> collection,Transfer<T> transfer,Connection conn){
+    static <T> void insertBatch(Collection<T> collection,Transfer<T> transfer){
         if(collection.size()==0||transfer.primaryKeys.size()==0)
             return;
+        Connection conn=transfer.getConnection();
         PreparedStatement pst =null;
         ResultSet rsAuto=null;
         try {

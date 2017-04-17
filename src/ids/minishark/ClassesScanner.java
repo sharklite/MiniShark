@@ -86,7 +86,6 @@ class ClassesScanner {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         if(classes.isEmpty()){
             try {
                 classes.add(Thread.currentThread().getContextClassLoader().loadClass(aClassName));

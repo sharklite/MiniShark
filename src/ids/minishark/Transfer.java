@@ -18,7 +18,7 @@ public abstract class Transfer<E> implements ITransfer{
     String delete_one;
     private String select_all;
 
-    private boolean dsFlag=false;
+    private boolean dsBySetter=false;
     private DataSource dataSource;
 
     public DataSource getDataSource() {
@@ -27,11 +27,11 @@ public abstract class Transfer<E> implements ITransfer{
 
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
-        this.dsFlag=true;
+        this.dsBySetter=true;
         this.init(this.eClass,this.tableName);
     }
 
-    private Connection getConnection(){
+    Connection getConnection(){
         Connection c=null;
         try {
             c=this.dataSource.getConnection();
@@ -144,17 +144,18 @@ public abstract class Transfer<E> implements ITransfer{
      * 包括表的主键、自增列、只读列
      * */
     private void init(Class<E> eClass,String table) {
-        if(!this.dsFlag){
-            this.dataSource=DataBase.defaultDS;
+        Class<?> key=this.getClass();
+        if(this.dsBySetter){
+            DataBase.CONFIG_DS.put(key,this.dataSource);
         }else {
-            Class<?> key=this.getClass();
             if(DataBase.CONFIG_DS.containsKey(key)){
                 this.dataSource=DataBase.CONFIG_DS.get(key);
-                this.dsFlag=true;
+            }else {
+                this.dataSource=DataBase.defaultDS;
             }
         }
         if(this.dataSource==null){
-            if (this.dsFlag)
+            if (this.dsBySetter||DataBase.CONFIG_DS.containsKey(key))
                 System.out.println("no dataSource in Transfer<"+ eClass.getName()+">");
             return;
         }
@@ -268,7 +269,7 @@ public abstract class Transfer<E> implements ITransfer{
         this.insert(l);
     }
     public void insert(Collection<E> connection){
-        BatchExecutor.insertBatch(connection,this,getConnection());
+        BatchExecutor.insertBatch(connection,this);
     }
     List<Object> insertOneBuilder(E e){
         this.entity=e;
@@ -303,7 +304,7 @@ public abstract class Transfer<E> implements ITransfer{
         this.modify(l);
     }
     public void modify(Collection<E> Collection){
-        BatchExecutor.modifyBatch(Collection,this,getConnection());
+        BatchExecutor.modifyBatch(Collection,this);
     }
     List<Object> modifyOneBuilder(E e){
         List<Object> valueList=new ArrayList<>();
@@ -349,7 +350,7 @@ public abstract class Transfer<E> implements ITransfer{
         this.delete(l);
     }
     public void delete(Collection<E> Collection){
-        BatchExecutor.deleteBatch(Collection,this,getConnection());
+        BatchExecutor.deleteBatch(Collection,this);
     }
     List<Object> deleteOneBuilder(E e){
         List<Object> valuesList=new ArrayList<>();
@@ -385,7 +386,7 @@ public abstract class Transfer<E> implements ITransfer{
         return l.isEmpty()?null:l.get(0);
     }
     public List<E> query(Collection<E> Collection){
-        return BatchExecutor.queryBatch(Collection,this,getConnection());
+        return BatchExecutor.queryBatch(Collection,this);
     }
     List<Object> queryOneBuilder(E e){
         List<Object> values=new ArrayList<>();
@@ -434,7 +435,7 @@ public abstract class Transfer<E> implements ITransfer{
     }
     protected String getString(String preparedSql,Object ...supportedSQLArg){
         Object o=this.getObject(preparedSql,supportedSQLArg);
-        return o==null?null:o.toString();
+        return String.valueOf(o);
     }
     protected BigDecimal tryBigDecimal(String preparedSql, Object ...supportedSQLArg){
         Object object=this.getObject(preparedSql,supportedSQLArg);
@@ -471,7 +472,6 @@ public abstract class Transfer<E> implements ITransfer{
         Number number=this.tryNumber(preparedSql,supportedSQLArg);
         return number==null?0:number.doubleValue();
     }
-
     private Number tryNumber(String preparedSql,Object ...supportedSQLArg){
         Number number=null;
         Object object=this.getObject(preparedSql,supportedSQLArg);
@@ -484,7 +484,6 @@ public abstract class Transfer<E> implements ITransfer{
         }
         return number;
     }
-
     //return java.util.Date
     protected Date tryDate(String preparedSql, Object ...supportedSQLArg){
         Object object=this.getObject(preparedSql,supportedSQLArg);
@@ -497,6 +496,5 @@ public abstract class Transfer<E> implements ITransfer{
             number=new BigDecimal(s);
         return number==null?null:new Date(number.longValue());
     }
-
 
 }
