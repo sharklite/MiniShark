@@ -237,8 +237,9 @@ public abstract class Transfer<E> implements ITransfer{
      * */
     void setFieldValue(String field, Object value){
         try {
-            if(value!=null)
-                fields.get(field).set(this.entity,value);
+            if(value==null)
+                value=_Transfer_.parseNullToValue(fields.get(field));
+             fields.get(field).set(this.entity,value);
         } catch (IllegalAccessException e) {
             System.out.println(this.eClass.getName()+" set value of "+field+" error.");
             e.printStackTrace();

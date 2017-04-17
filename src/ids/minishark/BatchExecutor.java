@@ -45,7 +45,7 @@ final class BatchExecutor {
     static <T> void modifyBatch(Collection<T> collection,Transfer<T> transfer){
          if(collection.size()==0||transfer.primaryKeys.size()==0)
              return;
-        Connection conn=transfer.getConnection();
+         Connection conn=transfer.getConnection();
          PreparedStatement pst =null;
          try {
              pst = conn.prepareStatement(transfer.modify_one);

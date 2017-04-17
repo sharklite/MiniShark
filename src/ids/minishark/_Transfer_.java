@@ -39,8 +39,9 @@ import java.util.*;
                 T entity= beanClass.newInstance();
                 for(String label:set){
                     Object value=rs.getObject(label);
-                    if(value!=null)
-                        stringFieldMap.get(label).set(entity,value);
+                    if(value==null)
+                        value=parseNullToValue(stringFieldMap.get(label));
+                    stringFieldMap.get(label).set(entity,value);
                 }
                 list.add(entity);
             }
@@ -142,6 +143,21 @@ import java.util.*;
             pst.setObject(index,object);
         else
             pst.setObject(index,object,code);
+    }
+
+    static Object parseNullToValue(Field field){
+        Object o=null;
+        Class c=field.getType();
+        if(c.equals(int.class)||c.equals(long.class)||c.equals(short.class)||c.equals(byte.class)){
+            o=0;
+        }else if(c.equals(double.class)||c.equals(float.class)){
+            o=0.0;
+        }else if (c.equals(boolean.class)){
+            o=false;
+        }else if(c.equals(char.class)){
+            o=0;
+        }
+        return o;
     }
 
 }
