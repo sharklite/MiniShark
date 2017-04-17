@@ -417,7 +417,7 @@ public abstract class Transfer<E> implements ITransfer{
     protected List<E> query(String condition,Object ...supportedSQLArg) {
         List<E> list=new ArrayList<>();
         try {
-            list= _TransferUtil_.executeQuery(getConnection(),this.select_all+" WHERE "+ condition, this.eClass, supportedSQLArg);
+            list= _Transfer_.executeQuery(getConnection(),this.select_all+" WHERE "+ condition, this.eClass, supportedSQLArg);
         }  catch (IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -425,13 +425,13 @@ public abstract class Transfer<E> implements ITransfer{
     }
 
     protected int executeUpdate(String preparedSql,Object...supportedSQLArg){
-        return _TransferUtil_.executeUpdate(getConnection(),preparedSql,supportedSQLArg);
+        return _Transfer_.executeUpdate(getConnection(),preparedSql,supportedSQLArg);
     }
     protected List<Object> firstColumnValues(String preparedSql,Object ...supportedSQLArg){
-        return _TransferUtil_.firstColumnValues(getConnection(),preparedSql,supportedSQLArg);
+        return _Transfer_.firstColumnValues(getConnection(),preparedSql,supportedSQLArg);
     }
     protected Object getObject(String preparedSql,Object ...supportedSQLArg)  {
-        return _TransferUtil_.getObject(getConnection(),preparedSql,supportedSQLArg);
+        return _Transfer_.getObject(getConnection(),preparedSql,supportedSQLArg);
     }
     protected String getString(String preparedSql,Object ...supportedSQLArg){
         Object o=this.getObject(preparedSql,supportedSQLArg);

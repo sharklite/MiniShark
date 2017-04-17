@@ -8,9 +8,9 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.util.*;
 
- final class _TransferUtil_ {
+ final class _Transfer_ {
 
-    private _TransferUtil_(){
+    private _Transfer_(){
 
     }
 
@@ -45,7 +45,7 @@ import java.util.*;
             }
         }catch (Exception e){
             e.printStackTrace();
-            System.out.print(_TransferUtil_.class.getName()+"\n"+ preparedSql);
+            System.out.print(_Transfer_.class.getName()+"\n"+ preparedSql);
         }finally {
             DataBase.close(rs);
             DataBase.close(pst);
@@ -66,7 +66,7 @@ import java.util.*;
             conn.commit();
         }catch (SQLException e){
             e.printStackTrace();
-            System.out.println(_TransferUtil_.class.getName()+"\n"+ preparedSql);
+            System.out.println(_Transfer_.class.getName()+"\n"+ preparedSql);
             try {
                 conn.rollback();
             } catch (SQLException ex) {
@@ -99,7 +99,7 @@ import java.util.*;
             }
         }catch (Exception e){
             System.out.println(e.toString());
-            System.out.print(_TransferUtil_.class.getName()+"\n"+ preparedSql);
+            System.out.print(_Transfer_.class.getName()+"\n"+ preparedSql);
         }finally {
             DataBase.close(rs);
             DataBase.close(statement);

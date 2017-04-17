@@ -21,7 +21,7 @@ final class BatchExecutor {
             for(T entity:collection){
                 List<Object> values=transfer.queryOneBuilder(entity);
                 PreparedStatement pst=conn.prepareStatement(transfer.select_one);
-                _TransferUtil_.invokePreparedStatement(pst,values,transfer.pkJdbcType);
+                _Transfer_.invokePreparedStatement(pst,values,transfer.pkJdbcType);
                 ResultSet rs=pst.executeQuery();
                 while(rs.next()){
                     list.add(entity);
@@ -52,7 +52,7 @@ final class BatchExecutor {
              int i=BATCH+1;
              for (T entity:collection){
                  List<Object> values=transfer.modifyOneBuilder(entity);
-                 _TransferUtil_.invokePreparedStatement(pst,values,transfer.jdbcTypeForModify);
+                 _Transfer_.invokePreparedStatement(pst,values,transfer.jdbcTypeForModify);
                  pst.addBatch();
                  if(i%BATCH==0){
                      pst.executeBatch();
@@ -86,7 +86,7 @@ final class BatchExecutor {
              int i=BATCH+1;
              for (T entity:collection){
                  List<Object> values=transfer.deleteOneBuilder(entity);
-                 _TransferUtil_.invokePreparedStatement(pst,values,transfer.pkJdbcType);
+                 _Transfer_.invokePreparedStatement(pst,values,transfer.pkJdbcType);
                  pst.addBatch();
                  if(i%BATCH==0){
                      pst.executeBatch();
@@ -120,7 +120,7 @@ final class BatchExecutor {
             pst = conn.prepareStatement(transfer.insert_one,PreparedStatement.RETURN_GENERATED_KEYS);
             for (T entity:collection){
                 List<Object> values=transfer.insertOneBuilder(entity);
-                _TransferUtil_.invokePreparedStatement(pst,values,transfer.jdbcTypeForInsert);
+                _Transfer_.invokePreparedStatement(pst,values,transfer.jdbcTypeForInsert);
                 pst.executeUpdate();
                 conn.commit();
                 if(transfer.autoIncrementCol!=null){
