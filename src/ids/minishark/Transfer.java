@@ -12,6 +12,7 @@ import java.util.*;
 
 public abstract class Transfer<E> implements ITransfer{
 
+
     String select_one;
     String insert_one;
     String modify_one;
@@ -138,12 +139,18 @@ public abstract class Transfer<E> implements ITransfer{
     public Transfer(String tableName){
         this.init(eClassGet(),tableName);
     }
+    Transfer(Class<E> eClass,String tableName){
+        this.init(eClass,tableName);
+    }
+
+
 
     /**
      * java对象与数据库表之间的对应关系
      * 包括表的主键、自增列、只读列
      * */
-    private void init(Class<E> eClass,String table) {
+    void init(Class<E> eClass,String table) {
+        this.eClass=eClass;
         Class<?> key=this.getClass();
         if(this.dsBySetter){
             DataBase.CONFIG_DS.put(key,this.dataSource);
@@ -156,10 +163,10 @@ public abstract class Transfer<E> implements ITransfer{
         }
         if(this.dataSource==null){
             if (this.dsBySetter||DataBase.CONFIG_DS.containsKey(key))
-                System.out.println("no dataSource in Transfer<"+ eClass.getName()+">");
+                System.out.println("no dataSource in Transfer<"+ this.eClass.getName()+">");
             return;
         }
-        this.eClass=eClass;
+
         //通过构造器或注解传入对应的数据库表，以注解传入的表为准
         this.tableName=table;
         Table tableAnnotation= eClass.getAnnotation(Table.class);
@@ -425,6 +432,7 @@ public abstract class Transfer<E> implements ITransfer{
         }
         return list;
     }
+
     protected int executeUpdate(String preparedSql,Object...supportedSQLArg){
         return _Transfer_.executeUpdate(getConnection(),preparedSql,supportedSQLArg);
     }
@@ -495,6 +503,24 @@ public abstract class Transfer<E> implements ITransfer{
         if(_String_.isNumeric(s))
             number=new BigDecimal(s);
         return number==null?null:new Date(number.longValue());
+    }
+
+
+    public <T> Transfer<T> getDefualt(Class<T> eClass,String table,DataSource dataSource){
+        Transfer<T> transfer=new DefaultTransfer<>(eClass,table);
+        transfer.setDataSource(dataSource);
+        return transfer;
+    }
+    public <T> Transfer<T> getDefualt(Class<T> eClass,String table){
+        return new DefaultTransfer<>(eClass,table);
+    }
+    public <T> Transfer<T> getDefualt(Class<T> eClass,DataSource dataSource){
+        Transfer<T> transfer=new DefaultTransfer<>(eClass);
+        transfer.setDataSource(dataSource);
+        return transfer;
+    }
+    public static <T> Transfer<T> getDefault(Class<T> eClass){
+        return new DefaultTransfer<>(eClass);
     }
 
 }

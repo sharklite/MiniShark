@@ -155,7 +155,7 @@ import java.util.*;
         }else if (c.equals(boolean.class)){
             o=false;
         }else if(c.equals(char.class)){
-            o=0;
+            o=' ';
         }
         return o;
     }
