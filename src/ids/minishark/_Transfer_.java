@@ -14,17 +14,14 @@ import java.util.*;
 
     }
 
-    static <T> List<T> executeQuery(Connection conn,String preparedSql, Class<T> beanClass,Object ...supportedSQLArg) throws IllegalAccessException {
+    static <T> List<T> executeQuery(String preparedSql,Transfer<T> transfer, Object ...supportedSQLArg) throws IllegalAccessException {
         List<T> list=new ArrayList<>();
         Set<String> set=new HashSet<>();
         PreparedStatement pst=null;
         ResultSet rs=null;
-        Map<String,Field> stringFieldMap=new HashMap<>();
-        Field[] fields=beanClass.getDeclaredFields();
-        for(Field field:fields){
-            field.setAccessible(true);
-            stringFieldMap.put(field.getName(),field);
-        }
+        Map<String,Field> stringFieldMap=transfer.fields;
+        Class<T> beanClass=transfer.eClass;
+        Connection conn=transfer.getConnection();
         try {
             pst=conn.prepareStatement(preparedSql);
             for(int i=0;i<supportedSQLArg.length;i++)
@@ -81,6 +78,7 @@ import java.util.*;
         return rows;
     }
 
+    //得到第一列的值
     private static List<Object> firstColumnValues(Connection conn,boolean firstRow, String preparedSql,Object ...supportedSQLArg){
         List<Object> list=new ArrayList<>();
         Object v;
@@ -110,16 +108,19 @@ import java.util.*;
         return list;
     }
 
+     //得到第一列的值
     static List<Object> firstColumnValues(Connection conn,String preparedSql,Object ...supportedSQLArg)  {
         return firstColumnValues(conn,false,preparedSql,supportedSQLArg);
     }
 
+     //得到第一列、第一行的值
     static Object getObject(Connection conn,String preparedSql,Object ...supportedSQLArg)  {
         List<Object> l=firstColumnValues(conn,true,preparedSql,supportedSQLArg);
         return l.size()==0?null:l.get(0);
     }
 
 
+    //处理PreparedStatement、
     static void  invokePreparedStatement(PreparedStatement pst, List<Object> params , List<Integer> type) throws SQLException {
         for (int i = 0; i < params.size(); i++) {
             int code=type.get(i);
@@ -145,17 +146,18 @@ import java.util.*;
             pst.setObject(index,object,code);
     }
 
+    //根据类型得到基本类型的默认值
     static Object parseNullToValue(Field field){
         Object o=null;
         Class c=field.getType();
         if(c.equals(int.class)||c.equals(long.class)||c.equals(short.class)||c.equals(byte.class)){
             o=0;
-        }else if(c.equals(double.class)||c.equals(float.class)){
-            o=0.0;
         }else if (c.equals(boolean.class)){
             o=false;
         }else if(c.equals(char.class)){
             o=' ';
+        }else if(c.equals(double.class)||c.equals(float.class)){
+            o=0.0;
         }
         return o;
     }

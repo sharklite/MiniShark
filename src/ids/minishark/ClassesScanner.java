@@ -86,6 +86,7 @@ class ClassesScanner {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        //packageName就是一个完整的类时
         if(classes.isEmpty()){
             try {
                 classes.add(Thread.currentThread().getContextClassLoader().loadClass(aClassName));

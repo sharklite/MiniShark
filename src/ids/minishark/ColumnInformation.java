@@ -8,12 +8,12 @@ import java.util.Set;
 
 final class ColumnInformation {
 
-    Set<String> readOnlyColumns;
-    Map<String,Integer> columnType;
-    Map<String,String> columnClass;
+    Set<String> readOnlyColumns;//只读列的列名
+    Map<String,Integer> columnType;//列名及对应的jdbc类型
+    Map<String,String> columnClass;//列名及对应的java类型
 
-    String autoIncrement;
-    Set<String> primaryKeys;
+    String autoIncrement;//自增列的列名
+    Set<String> primaryKeys;//主键列名
 
     private Connection connection;
 
@@ -33,6 +33,7 @@ final class ColumnInformation {
         init(tableName,eClass);
     }
 
+    //得到表及相关列的信息
     private void init(String tableName,Class eClass){
         this.columnType=new HashMap<>();
         this.columnClass=new HashMap<>();
@@ -81,6 +82,8 @@ final class ColumnInformation {
         }
     }
 
+
+    //检查是否存在此表
     private static boolean existTable(String tableName, Connection conn){
         boolean flag=false;
         ResultSet rsTables=null;

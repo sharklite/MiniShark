@@ -10,16 +10,20 @@ import java.util.*;
 
 public class DataBase {
 
+    //Transfer及对应数据源
     static final Hashtable<Class<?>,DataSource> CONFIG_DS=new Hashtable<>();
 
-    static DataSource defaultDS;
-    static int batch = 1024;
-    private DataSource ds;
+    static DataSource defaultDS;//Transfer默认的数据源，
+    static int batch = 1024;//批处理时一次调教的数量
+    private DataSource ds;//Transfer指定的数据源，适用于多数据源的情况，单数据源时与defaultDS相同
+
 
     public DataBase(DataSource dataSource){
         this.ds=DataBase.defaultDS=dataSource;
     }
 
+    //设置包名，哪些Transfer调用此对应的数据源，适用于多数据源的情况
+    //使用单一数据源时，可不用此项，默认使用defaultDS
     public void classLocationsConfig(String[] packageName){
         Set<Class<?>> set= new HashSet<>();
         for (String s:packageName){
@@ -36,6 +40,7 @@ public class DataBase {
         DataBase.batch=batch;
     }
 
+    //适用于单数据源
     public static void defaultDataSource(DataSource dataSource){
         defaultDS=dataSource;
     }

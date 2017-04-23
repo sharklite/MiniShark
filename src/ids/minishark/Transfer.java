@@ -12,14 +12,14 @@ import java.util.*;
 
 public abstract class Transfer<E> implements ITransfer{
 
-
+    //CRUD语句，带 '?'
     String select_one;
     String insert_one;
     String modify_one;
     String delete_one;
     private String select_all;
 
-    private boolean dsBySetter=false;
+    private boolean dsBySetter=false;//是否是通过setDataSource方法初始化dataSource
     private DataSource dataSource;
 
     public DataSource getDataSource() {
@@ -121,7 +121,7 @@ public abstract class Transfer<E> implements ITransfer{
         return this.tableName;
     }
 
-    //档通过继承Transfer时，得到E.class
+    //通过继承Transfer时，得到E.class
     private Class<E> eClassGet(){
         Type genType = this.getClass().getGenericSuperclass();
         Type[] params = ((ParameterizedType)genType).getActualTypeArguments();
@@ -139,6 +139,8 @@ public abstract class Transfer<E> implements ITransfer{
     public Transfer(String tableName){
         this.init(eClassGet(),tableName);
     }
+
+    //供getDefault使用
     Transfer(Class<E> eClass,String tableName){
         this.init(eClass,tableName);
     }
@@ -149,21 +151,21 @@ public abstract class Transfer<E> implements ITransfer{
      * java对象与数据库表之间的对应关系
      * 包括表的主键、自增列、只读列
      * */
-    void init(Class<E> eClass,String table) {
+    private void init(Class<E> eClass,String table) {
         this.eClass=eClass;
+        //配置对应的数据源
         Class<?> key=this.getClass();
         if(this.dsBySetter){
             DataBase.CONFIG_DS.put(key,this.dataSource);
         }else {
-            if(DataBase.CONFIG_DS.containsKey(key)){
+            if(DataBase.CONFIG_DS.containsKey(key)){//是否通过包名配置了数据源
                 this.dataSource=DataBase.CONFIG_DS.get(key);
             }else {
                 this.dataSource=DataBase.defaultDS;
             }
         }
         if(this.dataSource==null){
-            if (this.dsBySetter||DataBase.CONFIG_DS.containsKey(key))
-                System.out.println("no dataSource in Transfer<"+ this.eClass.getName()+">");
+            System.out.println("there's no dataSource in Transfer<"+ this.eClass.getName()+">");
             return;
         }
 
@@ -172,6 +174,7 @@ public abstract class Transfer<E> implements ITransfer{
         Table tableAnnotation= eClass.getAnnotation(Table.class);
         if(tableAnnotation!=null)
             this.tableName=tableAnnotation.value();
+        //E 对应表的信息
         ColumnInformation column=new ColumnInformation(this.tableName,this.eClass,this.getConnection());
         this.jdbcTypes=new HashMap<>();
         this.fields=new HashMap<>();
@@ -190,6 +193,8 @@ public abstract class Transfer<E> implements ITransfer{
             String fieldName=f.getName();
             fields.put(fieldName,f);
             //属性与列的对应关系，以及自定义的只读字段
+            //需要区别columnName和columnLabel，因为
+            //当fieldName与columnName不同时，用注解Column设置正确的columnName以保证正确映射
             ReadOnly readOnly=f.getAnnotation(ReadOnly.class);
             Column columnAnnotation=f.getAnnotation(Column.class);
             String columnNm;
@@ -198,7 +203,7 @@ public abstract class Transfer<E> implements ITransfer{
             }else{
                 columnNm=fieldName;
             }
-            //Field-Column 中列名和字段名都不能重复，键值一一对应,并且数据库中存在此列
+            //Field-Column 中列名和字段名都不能重复，键值一一对应,并且columnNm确定存在数据库表中
             boolean exist=columnNames.contains(columnNm);
             if(exist){
                 this.colFieldMapper.put(columnNm,fieldName);
@@ -214,10 +219,12 @@ public abstract class Transfer<E> implements ITransfer{
                 t=typeAnnotation.value();
             }
             jdbcTypes.put(fieldName,t);
+            //带有ConditionKey注解的Field会被当成有主键对应的列处理
             ConditionKey myPK=f.getAnnotation(ConditionKey.class);
             if(myPK!=null && exist)
                 primaryKeys.add(columnNm);
         }
+        //拼装SQL
         StringBuilder columnAs=new StringBuilder();
         for(String col:this.colFieldMapper.keySet()){
             String label=this.colFieldMapper.get(col);
@@ -235,12 +242,12 @@ public abstract class Transfer<E> implements ITransfer{
         this.deleteOneBuilder(e);
         this.queryOneBuilder(e);
         this.insertOneBuilder(e);
-        this.select_all="Select "+ this.allColumnLabels+" From "+this.tableName;
+        this.select_all="SELECT "+ this.allColumnLabels+" FROM "+this.tableName;
 
     }
 
     /**
-     * 通过属性名赋值
+     * 通过属性名给entity的属性赋值
      * */
     void setFieldValue(String field, Object value){
         try {
@@ -254,7 +261,7 @@ public abstract class Transfer<E> implements ITransfer{
     }
 
     /**
-     * 通过属性名取值
+     * 通过属性名从entity取值
      * */
     private Object getFieldValue(String field){
         Object v=null;
@@ -342,7 +349,7 @@ public abstract class Transfer<E> implements ITransfer{
             }
             if(whereByPK.length()!=0){
                 if(this.modify_one==null || this.jdbcTypeForInsert==null){
-                    this.modify_one="Update "+this.tableName +" Set "+sets.toString().substring(1)+"  Where 1=1 " +whereByPK.substring(1);
+                    this.modify_one="UPDATE "+this.tableName +" SET "+sets.toString().substring(1)+"  WHERE 1=1 " +whereByPK.substring(1);
                     this.jdbcTypeForModify=jdbcTypeList;
                 }
             }
@@ -377,7 +384,7 @@ public abstract class Transfer<E> implements ITransfer{
             }
             if(where.length()!=0){
                 if(this.delete_one==null || this.primaryKeys==null){
-                    this.delete_one="Delete From "+this.tableName +" Where 1=1 "+ where.substring(1);
+                    this.delete_one="DELETE FROM "+this.tableName +" WHERE 1=1 "+ where.substring(1);
                     this.pkJdbcType=jdbcTypeList;
                 }
             }
@@ -413,7 +420,7 @@ public abstract class Transfer<E> implements ITransfer{
             }
             //select * 的具体字段
             if(this.select_one==null || this.pkJdbcType==null){
-                this.select_one="Select "+ this.allColumnLabels+" From "+this.tableName+ " WHERE 1=1 "+ where.substring(1);
+                this.select_one="SELECT "+ this.allColumnLabels+" FROM "+this.tableName+ " WHERE 1=1 "+ where.substring(1);
                 this.pkJdbcType=types;
             }
         }
@@ -426,7 +433,7 @@ public abstract class Transfer<E> implements ITransfer{
     protected List<E> query(String condition,Object ...supportedSQLArg) {
         List<E> list=new ArrayList<>();
         try {
-            list= _Transfer_.executeQuery(getConnection(),this.select_all+" WHERE "+ condition, this.eClass, supportedSQLArg);
+            list= _Transfer_.executeQuery(this.select_all+" WHERE "+ condition, this, supportedSQLArg);
         }  catch (IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -506,15 +513,15 @@ public abstract class Transfer<E> implements ITransfer{
     }
 
 
-    public <T> Transfer<T> getDefualt(Class<T> eClass,String table,DataSource dataSource){
+    public <T> Transfer<T> getDefault(Class<T> eClass,String table,DataSource dataSource){
         Transfer<T> transfer=new DefaultTransfer<>(eClass,table);
         transfer.setDataSource(dataSource);
         return transfer;
     }
-    public <T> Transfer<T> getDefualt(Class<T> eClass,String table){
+    public <T> Transfer<T> getDefault(Class<T> eClass,String table){
         return new DefaultTransfer<>(eClass,table);
     }
-    public <T> Transfer<T> getDefualt(Class<T> eClass,DataSource dataSource){
+    public <T> Transfer<T> getDefault(Class<T> eClass,DataSource dataSource){
         Transfer<T> transfer=new DefaultTransfer<>(eClass);
         transfer.setDataSource(dataSource);
         return transfer;

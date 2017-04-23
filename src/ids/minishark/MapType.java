@@ -16,6 +16,7 @@ final class MapType {
     static final int UNDEFINED = Integer.MIN_VALUE;
 
     static {
+        //得到所有jdbc类型
         Field[] fields=Types.class.getFields();
         for(Field field:fields){
             try {
@@ -29,6 +30,7 @@ final class MapType {
     /***
      * @param object is the value for PreparedStatement
      * @return sql type
+     * 根据object判断jdbc的类型
      * */
      static int tryFrom(Object object){
         int code;
