@@ -515,6 +515,7 @@ public abstract class Transfer<E> implements ITransfer{
 
     public <T> Transfer<T> getDefault(Class<T> eClass,String table,DataSource dataSource){
         DataBase dataBase=new DataBase(dataSource);
+        dataBase.classLocationsConfig(eClass.getCanonicalName());
         return new DefaultTransfer<>(eClass,table);
     }
     public <T> Transfer<T> getDefault(Class<T> eClass,String table){
@@ -522,6 +523,7 @@ public abstract class Transfer<E> implements ITransfer{
     }
     public <T> Transfer<T> getDefault(Class<T> eClass,DataSource dataSource){
         DataBase dataBase=new DataBase(dataSource);
+        dataBase.classLocationsConfig(eClass.getCanonicalName());
         return new DefaultTransfer<>(eClass);
     }
     public static <T> Transfer<T> getDefault(Class<T> eClass){
