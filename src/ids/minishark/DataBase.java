@@ -19,7 +19,9 @@ public class DataBase {
 
 
     public DataBase(DataSource dataSource){
-        this.ds=DataBase.defaultDS=dataSource;
+        this.ds=dataSource;
+        if(DataBase.defaultDS==null)
+            DataBase.defaultDS=this.ds;
     }
 
     //设置包名，哪些Transfer调用此对应的数据源，适用于多数据源的情况
@@ -29,6 +31,15 @@ public class DataBase {
         for (String s:packageName){
             set.addAll(ClassesScanner.getClasses(s));
         }
+        for(Class key:set){
+            if(ITransfer.class.isAssignableFrom(key))
+                CONFIG_DS.put(key,this.ds);
+        }
+        set.clear();
+    }
+    public void classLocationsConfig(String packageName){
+        Set<Class<?>> set= new HashSet<>();
+        set.addAll(ClassesScanner.getClasses(packageName));
         for(Class key:set){
             if(ITransfer.class.isAssignableFrom(key))
                 CONFIG_DS.put(key,this.ds);

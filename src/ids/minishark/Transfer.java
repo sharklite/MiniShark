@@ -514,17 +514,15 @@ public abstract class Transfer<E> implements ITransfer{
 
 
     public <T> Transfer<T> getDefault(Class<T> eClass,String table,DataSource dataSource){
-        Transfer<T> transfer=new DefaultTransfer<>(eClass,table);
-        transfer.setDataSource(dataSource);
-        return transfer;
+        DataBase dataBase=new DataBase(dataSource);
+        return new DefaultTransfer<>(eClass,table);
     }
     public <T> Transfer<T> getDefault(Class<T> eClass,String table){
         return new DefaultTransfer<>(eClass,table);
     }
     public <T> Transfer<T> getDefault(Class<T> eClass,DataSource dataSource){
-        Transfer<T> transfer=new DefaultTransfer<>(eClass);
-        transfer.setDataSource(dataSource);
-        return transfer;
+        DataBase dataBase=new DataBase(dataSource);
+        return new DefaultTransfer<>(eClass);
     }
     public static <T> Transfer<T> getDefault(Class<T> eClass){
         return new DefaultTransfer<>(eClass);

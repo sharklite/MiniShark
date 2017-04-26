@@ -120,7 +120,7 @@ import java.util.*;
     }
 
 
-    //处理PreparedStatement、
+    //处理PreparedStatement
     static void  invokePreparedStatement(PreparedStatement pst, List<Object> params , List<Integer> type) throws SQLException {
         for (int i = 0; i < params.size(); i++) {
             int code=type.get(i);
@@ -161,6 +161,7 @@ import java.util.*;
         }
         return o;
     }
+
 
 }
 
