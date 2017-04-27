@@ -284,8 +284,11 @@ public abstract class Transfer<E> implements ITransfer{
         l.add(e);
         this.insert(l);
     }
-    public void insert(Collection<E> connection){
-        BatchExecutor.insertBatch(connection,this);
+    public void insert(Collection<E> collection){
+        for(E e:collection){
+            beforeUpdateEntity(e);
+        }
+        BatchExecutor.insertBatch(collection,this);
     }
     List<Object> insertOneBuilder(E e){
         this.entity=e;
@@ -319,8 +322,11 @@ public abstract class Transfer<E> implements ITransfer{
         l.add(e);
         this.modify(l);
     }
-    public void modify(Collection<E> Collection){
-        BatchExecutor.modifyBatch(Collection,this);
+    public void modify(Collection<E> collection){
+        for(E e:collection){
+            beforeUpdateEntity(e);
+        }
+        BatchExecutor.modifyBatch(collection,this);
     }
     List<Object> modifyOneBuilder(E e){
         List<Object> valueList=new ArrayList<>();
@@ -365,8 +371,11 @@ public abstract class Transfer<E> implements ITransfer{
         l.add(e);
         this.delete(l);
     }
-    public void delete(Collection<E> Collection){
-        BatchExecutor.deleteBatch(Collection,this);
+    public void delete(Collection<E> collection){
+        for(E e:collection){
+            beforeUpdateEntity(e);
+        }
+        BatchExecutor.deleteBatch(collection,this);
     }
     List<Object> deleteOneBuilder(E e){
         List<Object> valuesList=new ArrayList<>();
@@ -402,7 +411,11 @@ public abstract class Transfer<E> implements ITransfer{
         return l.isEmpty()?null:l.get(0);
     }
     public List<E> query(Collection<E> Collection){
-        return BatchExecutor.queryBatch(Collection,this);
+        List<E> list=BatchExecutor.queryBatch(Collection,this);
+        for(E e:list){
+            afterFindEntity(e);
+        }
+        return list;
     }
     List<Object> queryOneBuilder(E e){
         List<Object> values=new ArrayList<>();
@@ -426,6 +439,16 @@ public abstract class Transfer<E> implements ITransfer{
         }
         return values;
     }
+    
+    
+    protected void beforeUpdateEntity(E entity){
+        
+    }
+
+    protected void afterFindEntity(E entity){
+
+    }
+    
 
     /**
      * @param condition 按条件查询所有列,不要包含where关键字
@@ -436,6 +459,9 @@ public abstract class Transfer<E> implements ITransfer{
             list= _Transfer_.executeQuery(this.select_all+" WHERE "+ condition, this, supportedSQLArg);
         }  catch (IllegalAccessException e) {
             e.printStackTrace();
+        }
+        for(E e:list){
+            afterFindEntity(e);
         }
         return list;
     }

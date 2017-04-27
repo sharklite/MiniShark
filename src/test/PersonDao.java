@@ -27,6 +27,11 @@ public class PersonDao extends Transfer<Person> {
         super.insert(person);
     }
 
+    @Override
+    protected void afterFindEntity(Person person){
+        person.setName(person.getName()==null?"***":person.getName());
+    }
+
     public List<Person> queryOld() {
         Calendar calendar=Calendar.getInstance();
         calendar.set(Calendar.YEAR,1986);
