@@ -286,7 +286,7 @@ public abstract class Transfer<E> implements ITransfer{
     }
     public void insert(Collection<E> collection){
         for(E e:collection){
-            beforeUpdateEntity(e);
+            beforeInsert(e);
         }
         BatchExecutor.insertBatch(collection,this);
     }
@@ -324,7 +324,7 @@ public abstract class Transfer<E> implements ITransfer{
     }
     public void modify(Collection<E> collection){
         for(E e:collection){
-            beforeUpdateEntity(e);
+            beforeModify(e);
         }
         BatchExecutor.modifyBatch(collection,this);
     }
@@ -373,7 +373,7 @@ public abstract class Transfer<E> implements ITransfer{
     }
     public void delete(Collection<E> collection){
         for(E e:collection){
-            beforeUpdateEntity(e);
+            beforeDelete(e);
         }
         BatchExecutor.deleteBatch(collection,this);
     }
@@ -413,7 +413,7 @@ public abstract class Transfer<E> implements ITransfer{
     public List<E> query(Collection<E> Collection){
         List<E> list=BatchExecutor.queryBatch(Collection,this);
         for(E e:list){
-            afterFindEntity(e);
+            afterQuery(e);
         }
         return list;
     }
@@ -440,12 +440,18 @@ public abstract class Transfer<E> implements ITransfer{
         return values;
     }
     
-    
-    protected void beforeUpdateEntity(E entity){
+    //在delete, modify, insert前，对entity进行操作
+    protected void beforeDelete(E entity){
         
     }
+    protected void beforeInsert(E entity){
 
-    protected void afterFindEntity(E entity){
+    }
+    protected void beforeModify(E entity){
+
+    }
+    //在查询出结果后，对entity进行操作
+    protected void afterQuery(E entity){
 
     }
     
@@ -461,7 +467,7 @@ public abstract class Transfer<E> implements ITransfer{
             e.printStackTrace();
         }
         for(E e:list){
-            afterFindEntity(e);
+            afterQuery(e);
         }
         return list;
     }

@@ -28,8 +28,8 @@ public class PersonDao extends Transfer<Person> {
     }
 
     @Override
-    protected void afterFindEntity(Person person){
-        person.setName(person.getName()==null?"***":person.getName());
+    protected void afterQuery(Person person){
+        person.setName(person.getName()==null?"***":person.getName()+" ---");
     }
 
     public List<Person> queryOld() {
