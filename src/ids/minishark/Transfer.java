@@ -562,4 +562,38 @@ public abstract class Transfer<E> implements ITransfer{
         return new DefaultTransfer<>(eClass);
     }
 
+
+    /**
+    * 修改一个entity
+    * 只修改Enumeration中存在的属性名
+    * */
+
+    public void saveWithNamed(E entity, Enumeration enumFieldNames){
+        Set<String> set=new HashSet<>();
+        while (enumFieldNames.hasMoreElements()){
+            set.add((String)enumFieldNames.nextElement());
+        }
+        this.saveWithNamed(entity,set);
+    }
+    /**
+     * 修改一个entity
+     * 只修改Set<String>中存在的属性名
+     * */
+    public void saveWithNamed(E entity, Set<String> fieldNames){
+        if(entity!=null){
+            this.entity=entity;
+            Map<String,Object> map=new HashMap<>();
+            for(String name:fieldNames){
+                map.put(name,getFieldValue(name));
+            }
+            this.entity=this.query(entity);
+            if(this.entity!=null){
+                for(String name:map.keySet()){
+                    setFieldValue(name,map.get(name));
+                }
+                this.modify(this.entity);
+            }
+        }
+    }
+
 }
