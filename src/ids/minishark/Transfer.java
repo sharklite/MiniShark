@@ -584,7 +584,8 @@ public abstract class Transfer<E> implements ITransfer{
             this.entity=entity;
             Map<String,Object> map=new HashMap<>();
             for(String name:fieldNames){
-                map.put(name,getFieldValue(name));
+                if(fields.keySet().contains(name))
+                    map.put(name,getFieldValue(name));
             }
             this.entity=this.query(entity);
             if(this.entity!=null){
