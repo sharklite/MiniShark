@@ -1,6 +1,7 @@
 package ids.minishark;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.sql.*;
 import java.util.*;
 

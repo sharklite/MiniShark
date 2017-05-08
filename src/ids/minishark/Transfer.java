@@ -568,10 +568,10 @@ public abstract class Transfer<E> implements ITransfer{
     * 只修改Enumeration中存在的属性名
     * */
 
-    public void saveWithNamed(E entity, Enumeration enumFieldNames){
+    public void saveWithNamed(E entity, Enumeration<String> enumFieldNames){
         Set<String> set=new HashSet<>();
         while (enumFieldNames.hasMoreElements()){
-            set.add((String)enumFieldNames.nextElement());
+            set.add(enumFieldNames.nextElement());
         }
         this.saveWithNamed(entity,set);
     }
@@ -596,5 +596,6 @@ public abstract class Transfer<E> implements ITransfer{
             }
         }
     }
+
 
 }
