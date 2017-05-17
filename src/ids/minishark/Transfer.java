@@ -597,5 +597,16 @@ public abstract class Transfer<E> implements ITransfer{
         }
     }
 
+    public E setValues(E e,Map<String,Object> map){
+        if(e==null)
+            return null;
+        this.entity=e;
+        for(String s:map.keySet()){
+            if(fields.keySet().contains(s))
+                this.setFieldValue(s,map.get(s));
+        }
+        return this.entity;
+    }
+
 
 }
