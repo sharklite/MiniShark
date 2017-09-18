@@ -165,7 +165,7 @@ public abstract class Transfer<E> implements ITransfer{
             }
         }
         if(this.dataSource==null){
-            System.out.println("there's no dataSource in Transfer<"+ this.eClass.getName()+">");
+            System.err.println("error:there's no dataSource in Transfer<"+ this.eClass.getName()+">");
             return;
         }
 
@@ -547,7 +547,7 @@ public abstract class Transfer<E> implements ITransfer{
 
     public <T> Transfer<T> getDefault(Class<T> eClass,String table,DataSource dataSource){
         DataBase dataBase=new DataBase(dataSource);
-        dataBase.classLocationsConfig(eClass.getCanonicalName());
+        dataBase.setPackageConfig(eClass.getCanonicalName());
         return new DefaultTransfer<>(eClass,table);
     }
     public <T> Transfer<T> getDefault(Class<T> eClass,String table){
@@ -555,7 +555,7 @@ public abstract class Transfer<E> implements ITransfer{
     }
     public <T> Transfer<T> getDefault(Class<T> eClass,DataSource dataSource){
         DataBase dataBase=new DataBase(dataSource);
-        dataBase.classLocationsConfig(eClass.getCanonicalName());
+        dataBase.setPackageConfig(eClass.getCanonicalName());
         return new DefaultTransfer<>(eClass);
     }
     public static <T> Transfer<T> getDefault(Class<T> eClass){

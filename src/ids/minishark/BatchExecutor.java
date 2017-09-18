@@ -1,13 +1,12 @@
 package ids.minishark;
 
 import java.lang.reflect.Field;
-import java.math.BigDecimal;
 import java.sql.*;
 import java.util.*;
 
 final class BatchExecutor {
 
-    private static final int BATCH = DataBase.batch;
+    private static int batch = DataBase.batch;
 
     private BatchExecutor() {
 
@@ -52,12 +51,12 @@ final class BatchExecutor {
         PreparedStatement pst = null;
         try {
             pst = conn.prepareStatement(transfer.modify_one);
-            int i = BATCH + 1;
+            int i = batch + 1;
             for (T entity : collection) {
                 List<Object> values = transfer.modifyOneBuilder(entity);
                 _Transfer_.invokePreparedStatement(pst, values, transfer.jdbcTypeForModify);
                 pst.addBatch();
-                if (i % BATCH == 0) {
+                if (i % batch == 0) {
                     pst.executeBatch();
                     pst.clearBatch();
                 }
@@ -87,12 +86,12 @@ final class BatchExecutor {
         PreparedStatement pst = null;
         try {
             pst = conn.prepareStatement(transfer.delete_one);
-            int i = BATCH + 1;
+            int i = batch + 1;
             for (T entity : collection) {
                 List<Object> values = transfer.deleteOneBuilder(entity);
                 _Transfer_.invokePreparedStatement(pst, values, transfer.pkJdbcType);
                 pst.addBatch();
-                if (i % BATCH == 0) {
+                if (i % batch == 0) {
                     pst.executeBatch();
                     pst.clearBatch();
                 }
