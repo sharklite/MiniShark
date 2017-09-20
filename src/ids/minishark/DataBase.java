@@ -34,19 +34,18 @@ public class DataBase {
     //设置包名，哪些Transfer调用此对应的数据源，适用于多数据源的情况
     //使用单一数据源时，可不用此项，默认使用defaultDS
     public void setPackageConfig(String[] packageName){
+        this.setPackageConfig(Arrays.asList(packageName));
+    }
+    public void setPackageConfig(String packageName){
+        Set<String> set= new HashSet<>();
+        set.add(packageName);
+        this.setPackageConfig(set);
+    }
+    public void setPackageConfig(Collection<String> packageName){
         Set<Class<?>> set= new HashSet<>();
         for (String s:packageName){
             set.addAll(ClassesScanner.getClasses(s));
         }
-        for(Class key:set){
-            if(ITransfer.class.isAssignableFrom(key))
-                CONFIG_DS.put(key,this.ds);
-        }
-        set.clear();
-    }
-    public void setPackageConfig(String packageName){
-        Set<Class<?>> set= new HashSet<>();
-        set.addAll(ClassesScanner.getClasses(packageName));
         for(Class key:set){
             if(ITransfer.class.isAssignableFrom(key))
                 CONFIG_DS.put(key,this.ds);

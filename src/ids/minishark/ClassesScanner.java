@@ -16,7 +16,7 @@ class ClassesScanner {
 
     static Set<Class<?>> getClasses(String packageName) {
         Set<Class<?>> classes = new HashSet<>();
-        String aClassName=packageName;
+        String classNames=packageName;
         // 获取包的名字 并进行替换
         packageName=packageName.replace(".*","");
         String packageDirName = packageName.replace('.', '/');
@@ -89,7 +89,7 @@ class ClassesScanner {
         //packageName就是一个完整的类时
         if(classes.isEmpty()){
             try {
-                classes.add(Thread.currentThread().getContextClassLoader().loadClass(aClassName));
+                classes.add(Thread.currentThread().getContextClassLoader().loadClass(classNames));
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
