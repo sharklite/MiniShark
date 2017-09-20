@@ -1,5 +1,6 @@
 package ids.minishark;
 
+import com.sun.istack.internal.NotNull;
 import ids.minishark.annotation.*;
 
 import javax.sql.DataSource;
@@ -416,13 +417,14 @@ public abstract class Transfer<E> implements ITransfer {
     /**
      * 根据实体类及对应主键查找数据
      */
+    @NotNull
     public E query(E e) {
         List<E> l = new ArrayList<>();
         l.add(e);
         l = this.query(l);
         return l.isEmpty() ? null : l.get(0);
     }
-
+    @NotNull
     public List<E> query(Collection<E> Collection) {
         List<E> list = BatchExecutor.queryBatch(Collection, this);
         for (E e : list) {
@@ -475,11 +477,32 @@ public abstract class Transfer<E> implements ITransfer {
 
     /**
      * @param condition 按条件查询所有列,不要包含where关键字
+     * @param supportedSQLArg 可变长参数，与condition中的 ? 对应
      */
+    @NotNull
     protected List<E> query(String condition, Object... supportedSQLArg) {
         List<E> list = new ArrayList<>();
         try {
             list = _Transfer_.executeQuery(this.select_all + " WHERE " + condition, this, supportedSQLArg);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        for (E e : list) {
+            afterQuery(e);
+        }
+        return list;
+    }
+    /**
+     * @param startIndex 起始列的行数
+     * @param rows 从startIndex开始，查询出多少行
+     * @param condition 按条件查询所有列,不要包含where关键字
+     * @param supportedSQLArg 可变长参数，与condition中的 ? 对应
+     */
+    @NotNull
+    protected List<E> query(int startIndex,int rows,String condition, Object... supportedSQLArg) {
+        List<E> list = new ArrayList<>();
+        try {
+            list = _Transfer_.executeQuery(startIndex,rows,this.select_all + " WHERE " + condition, this, supportedSQLArg);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -503,7 +526,7 @@ public abstract class Transfer<E> implements ITransfer {
 
     protected String getString(String preparedSql, Object... supportedSQLArg) {
         Object o = this.getObject(preparedSql, supportedSQLArg);
-        return String.valueOf(o);
+        return (o == null) ? null : o.toString();
     }
 
     protected BigDecimal tryBigDecimal(String preparedSql, Object... supportedSQLArg) {
@@ -520,7 +543,11 @@ public abstract class Transfer<E> implements ITransfer {
         if (object instanceof Boolean)
             return (boolean) object;
         String s = String.valueOf(object).trim();
-        return s.equals("1") || Boolean.parseBoolean(s);
+        if(_String_.isNumeric(s)){
+            Number number=new BigDecimal(s);
+            return number.intValue()==0;
+        }
+        return Boolean.parseBoolean(s);
     }
 
     protected byte tryByte(String preparedSql, Object... supportedSQLArg) {
