@@ -599,8 +599,7 @@ public abstract class Transfer<E> implements ITransfer {
             number = new BigDecimal(s);
         return number == null ? null : new Date(number.longValue());
     }
-
-
+    
     public <T> Transfer<T> getDefault(Class<T> eClass, String table, DataSource dataSource) {
         DataBase dataBase = new DataBase(dataSource);
         dataBase.setPackageConfig(eClass.getCanonicalName());

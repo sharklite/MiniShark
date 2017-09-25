@@ -18,7 +18,7 @@ class ClassesScanner {
         Set<Class<?>> classes = new HashSet<>();
         String classNames=packageName;
         // 获取包的名字 并进行替换
-        packageName=packageName.replace(".*","");
+        packageName=packageName.replace(".*","").replace("/*","");
         String packageDirName = packageName.replace('.', '/');
         Enumeration<URL> dirs;
         try {
