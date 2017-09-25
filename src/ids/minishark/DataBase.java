@@ -14,7 +14,7 @@ public class DataBase {
     static final Hashtable<Class<?>,DataSource> CONFIG_DS=new Hashtable<>();
 
     static DataSource defaultDS;//Transfer默认的数据源，
-    static int batch = 1024;//批处理时一次调教的数量
+    static int batch = 1024;//批处理时一次commit的数量
     private DataSource ds;//Transfer指定的数据源，适用于多数据源的情况，单数据源时与defaultDS相同
 
 
@@ -56,6 +56,7 @@ public class DataBase {
     public static void defaultBatch(int batch){
         DataBase.batch=batch;
     }
+
 
     //适用于单数据源
     public static void defaultDataSource(DataSource dataSource){

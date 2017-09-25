@@ -417,7 +417,6 @@ public abstract class Transfer<E> implements ITransfer {
     /**
      * 根据实体类及对应主键查找数据
      */
-    @NotNull
     public E query(E e) {
         List<E> l = new ArrayList<>();
         l.add(e);
@@ -599,7 +598,7 @@ public abstract class Transfer<E> implements ITransfer {
             number = new BigDecimal(s);
         return number == null ? null : new Date(number.longValue());
     }
-    
+
     public <T> Transfer<T> getDefault(Class<T> eClass, String table, DataSource dataSource) {
         DataBase dataBase = new DataBase(dataSource);
         dataBase.setPackageConfig(eClass.getCanonicalName());
@@ -625,7 +624,6 @@ public abstract class Transfer<E> implements ITransfer {
      * 修改一个entity
      * 只修改Enumeration中存在的属性名
      */
-
     public void saveWithNamed(E entity, Enumeration<String> enumFieldNames) {
         Set<String> set = new HashSet<>();
         while (enumFieldNames.hasMoreElements()) {

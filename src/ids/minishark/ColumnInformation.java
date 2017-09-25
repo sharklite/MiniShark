@@ -19,13 +19,6 @@ final class ColumnInformation {
 
     /**
      * @param tableName  the table name in database
-     * */
-    ColumnInformation(String tableName,Connection connection){
-        this.connection=connection;
-        init(tableName,null);
-    }
-    /**
-     * @param tableName  the table name in database
      * @param eClass  the table mapped class
      * */
     ColumnInformation(String tableName,Class eClass,Connection connection){

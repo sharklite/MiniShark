@@ -1,5 +1,7 @@
 package ids.minishark;
 
+import com.sun.istack.internal.NotNull;
+
 import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.*;
@@ -13,6 +15,7 @@ final class BatchExecutor {
     }
 
 
+    @NotNull
     static <T> List<T> queryBatch(Collection<T> collection, Transfer<T> transfer) {
         List<T> list = new ArrayList<>();
         if (collection.size() == 0 || transfer.primaryKeys.size() == 0)
