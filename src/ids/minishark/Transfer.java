@@ -482,7 +482,7 @@ public abstract class Transfer<E> implements ITransfer {
     protected List<E> query(String condition, Object... supportedSQLArg) {
         List<E> list = new ArrayList<>();
         try {
-            list = _Transfer_.executeQuery(this.select_all + " WHERE " + condition, this, supportedSQLArg);
+            list = _Transfer_.executeQuery(false,0,0,this.select_all + " WHERE " + condition, this, supportedSQLArg);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -501,7 +501,7 @@ public abstract class Transfer<E> implements ITransfer {
     protected List<E> query(int startIndex,int rows,String condition, Object... supportedSQLArg) {
         List<E> list = new ArrayList<>();
         try {
-            list = _Transfer_.executeQuery(startIndex,rows,this.select_all + " WHERE " + condition, this, supportedSQLArg);
+            list = _Transfer_.executeQuery(true,startIndex,rows,this.select_all + " WHERE " + condition, this, supportedSQLArg);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }

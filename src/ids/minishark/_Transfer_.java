@@ -14,7 +14,7 @@ final class _Transfer_ {
 
     }
 
-    static <T> List<T> executeQuery(int startIndex,int rows,String preparedSql, Transfer<T> transfer, Object... supportedSQLArg) throws IllegalAccessException {
+    static <T> List<T> executeQuery(boolean byPage,int startIndex,int rows,String preparedSql, Transfer<T> transfer, Object... supportedSQLArg)throws IllegalAccessException {
         List<T> list = new ArrayList<>();
         Set<String> set = new HashSet<>();
         PreparedStatement pst = null;
@@ -33,7 +33,8 @@ final class _Transfer_ {
                 String label = meta.getColumnLabel(i);
                 set.add(label);
             }
-            rs.absolute(startIndex-1);
+            if(byPage)
+                rs.absolute(startIndex-1);
             while (rs.next()) {
                 count++;
                 T entity = beanClass.newInstance();
@@ -42,46 +43,10 @@ final class _Transfer_ {
                     entityFieldValueSet(stringFieldMap.get(label),entity,value);
                 }
                 list.add(entity);
-                if(count>=rows)
-                    break;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.print(_Transfer_.class.getName() + "\n" + preparedSql);
-        } finally {
-            DataBase.close(rs);
-            DataBase.close(pst);
-            DataBase.close(conn);
-        }
-        return list;
-    }
-
-
-    static <T> List<T> executeQuery(String preparedSql, Transfer<T> transfer, Object... supportedSQLArg) throws IllegalAccessException {
-        List<T> list = new ArrayList<>();
-        Set<String> set = new HashSet<>();
-        PreparedStatement pst = null;
-        ResultSet rs = null;
-        Map<String, Field> stringFieldMap = transfer.fields;
-        Class<T> beanClass = transfer.eClass;
-        Connection conn = transfer.getConnection();
-        try {
-            pst = conn.prepareStatement(preparedSql);
-            for (int i = 0; i < supportedSQLArg.length; i++)
-                invokePreparedStatement(pst, (i + 1), supportedSQLArg[i]);
-            rs = pst.executeQuery();
-            ResultSetMetaData meta = rs.getMetaData();
-            for (int i = 1; i <= meta.getColumnCount(); i++) {
-                String label = meta.getColumnLabel(i);
-                set.add(label);
-            }
-            while (rs.next()) {
-                T entity = beanClass.newInstance();
-                for (String label : set) {
-                    Object value = rs.getObject(label);
-                    entityFieldValueSet(stringFieldMap.get(label),entity,value);
+                if(byPage){
+                    if(count>=rows)
+                        break;
                 }
-                list.add(entity);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -93,6 +58,7 @@ final class _Transfer_ {
         }
         return list;
     }
+
 
     private static void entityFieldValueSet(Field field,Object entity,Object value) throws IllegalAccessException {
         if (value == null)
