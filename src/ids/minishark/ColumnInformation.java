@@ -15,14 +15,14 @@ final class ColumnInformation {
     String autoIncrement;//自增列的列名
     Set<String> primaryKeys;//主键列名
 
-    private Connection connection;
+    private Connection conn;
 
     /**
      * @param tableName  the table name in database
      * @param eClass  the table mapped class
      * */
     ColumnInformation(String tableName,Class eClass,Connection connection){
-        this.connection=connection;
+        this.conn =connection;
         init(tableName,eClass);
     }
 
@@ -35,11 +35,10 @@ final class ColumnInformation {
 
         ResultSet rs=null;
         Statement statement=null;
-        Connection conn=this.connection;
         ResultSet primaryKeyResultSet=null;
         String sql="SELECT * FROM  " + tableName+ " WHERE 1=0";
         try{
-            if(existTable(tableName,conn)){
+            if(existTable(tableName)){
                 statement=conn.createStatement();
                 rs=statement.executeQuery(sql);
                 ResultSetMetaData meta=rs.getMetaData();
@@ -77,7 +76,7 @@ final class ColumnInformation {
 
 
     //检查是否存在此表
-    private static boolean existTable(String tableName, Connection conn){
+    private boolean existTable(String tableName){
         boolean flag=false;
         ResultSet rsTables=null;
         try {

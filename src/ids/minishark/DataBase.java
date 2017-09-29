@@ -57,7 +57,6 @@ public class DataBase {
         DataBase.batch=batch;
     }
 
-
     //适用于单数据源
     public static void defaultDataSource(DataSource dataSource){
         defaultDS=dataSource;

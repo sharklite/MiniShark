@@ -247,9 +247,7 @@ public abstract class Transfer<E> implements ITransfer {
         } catch (ReflectiveOperationException roe) {
             roe.printStackTrace();
         }
-
         this.select_all = "SELECT " + this.allColumnLabels + " FROM " + this.tableName;
-
     }
 
     /**
@@ -281,7 +279,6 @@ public abstract class Transfer<E> implements ITransfer {
     }
 
     //CRUD by Primary Keys
-
     /**
      * 插入数据
      */
@@ -482,7 +479,7 @@ public abstract class Transfer<E> implements ITransfer {
     protected List<E> query(String condition, Object... supportedSQLArg) {
         List<E> list = new ArrayList<>();
         try {
-            list = _Transfer_.executeQuery(false,0,0,this.select_all + " WHERE " + condition, this, supportedSQLArg);
+            list = _Transfer_.executeQuery(Boolean.FALSE,0,0,this.select_all + " WHERE " + condition, this, supportedSQLArg);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -501,7 +498,7 @@ public abstract class Transfer<E> implements ITransfer {
     protected List<E> query(int startIndex,int rows,String condition, Object... supportedSQLArg) {
         List<E> list = new ArrayList<>();
         try {
-            list = _Transfer_.executeQuery(true,startIndex,rows,this.select_all + " WHERE " + condition, this, supportedSQLArg);
+            list = _Transfer_.executeQuery(Boolean.TRUE,startIndex,rows,this.select_all + " WHERE " + condition, this, supportedSQLArg);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -525,7 +522,7 @@ public abstract class Transfer<E> implements ITransfer {
 
     protected String getString(String preparedSql, Object... supportedSQLArg) {
         Object o = this.getObject(preparedSql, supportedSQLArg);
-        return (o == null) ? null : o.toString();
+        return o == null ? null : o.toString();
     }
 
     protected BigDecimal tryBigDecimal(String preparedSql, Object... supportedSQLArg) {
@@ -600,9 +597,9 @@ public abstract class Transfer<E> implements ITransfer {
     }
 
     public <T> Transfer<T> getDefault(Class<T> eClass, String table, DataSource dataSource) {
-        DataBase dataBase = new DataBase(dataSource);
-        dataBase.setPackageConfig(eClass.getCanonicalName());
-        return new DefaultTransfer<>(eClass, table);
+        Transfer<T> transfer=new DefaultTransfer<>(eClass, table);
+        transfer.setDataSource(dataSource);
+        return transfer;
     }
 
     public <T> Transfer<T> getDefault(Class<T> eClass, String table) {
@@ -610,15 +607,14 @@ public abstract class Transfer<E> implements ITransfer {
     }
 
     public <T> Transfer<T> getDefault(Class<T> eClass, DataSource dataSource) {
-        DataBase dataBase = new DataBase(dataSource);
-        dataBase.setPackageConfig(eClass.getCanonicalName());
-        return new DefaultTransfer<>(eClass);
+        Transfer<T> transfer=new DefaultTransfer<>(eClass);
+        transfer.setDataSource(dataSource);
+        return transfer;
     }
 
     public static <T> Transfer<T> getDefault(Class<T> eClass) {
         return new DefaultTransfer<>(eClass);
     }
-
 
     /**
      * 修改一个entity
