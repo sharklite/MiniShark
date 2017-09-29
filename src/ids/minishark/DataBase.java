@@ -41,6 +41,7 @@ public class DataBase {
         set.add(packageName);
         this.setPackageConfig(set);
     }
+
     public void setPackageConfig(Collection<String> packageName){
         Set<Class<?>> set= new HashSet<>();
         for (String s:packageName){

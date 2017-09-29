@@ -174,7 +174,6 @@ public abstract class Transfer<E> implements ITransfer {
             }
             return;
         }
-        DataBase.CONFIG_DS.put(key, this.dataSource);
 
         //通过构造器或注解传入对应的数据库表，以注解传入的表为准
         this.tableName = table;

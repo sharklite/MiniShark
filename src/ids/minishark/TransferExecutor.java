@@ -258,6 +258,7 @@ final class TransferExecutor {
     }
 
     //得到第一列的值
+    @NotNull
     private static List<Object> firstColumnValues(Connection conn, boolean firstRow, String preparedSql, Object... supportedSQLArg) {
         List<Object> list = new ArrayList<>();
         Object v;
@@ -289,12 +290,12 @@ final class TransferExecutor {
 
     //得到第一列的值
     static List<Object> firstColumnValues(Connection conn, String preparedSql, Object... supportedSQLArg) {
-        return firstColumnValues(conn, false, preparedSql, supportedSQLArg);
+        return firstColumnValues(conn, Boolean.FALSE, preparedSql, supportedSQLArg);
     }
 
     //得到第一列、第一行的值
     static Object getObject(Connection conn, String preparedSql, Object... supportedSQLArg) {
-        List<Object> l = firstColumnValues(conn, true, preparedSql, supportedSQLArg);
+        List<Object> l = firstColumnValues(conn, Boolean.TRUE, preparedSql, supportedSQLArg);
         return l.size() == 0 ? null : l.get(0);
     }
 
