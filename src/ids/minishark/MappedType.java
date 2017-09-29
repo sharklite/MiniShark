@@ -6,9 +6,9 @@ import java.sql.Types;
 import java.util.HashSet;
 import java.util.Set;
 
-final class MapType {
+final class MappedType {
 
-    private MapType(){
+    private MappedType(){
     }
 
     private static final Set<Integer> JDBC_TYPE=new HashSet<>();

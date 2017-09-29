@@ -28,6 +28,7 @@ public abstract class Transfer<E> implements ITransfer {
         return dataSource;
     }
 
+    @Override
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
         this.dsBySetter = true;
@@ -217,7 +218,7 @@ public abstract class Transfer<E> implements ITransfer {
                     this.readOnlyColumns.add(columnNm);
             }
             JdbcType typeAnnotation = f.getAnnotation(JdbcType.class);
-            int t = MapType.UNDEFINED;
+            int t = MappedType.UNDEFINED;
             if (typeAnnotation == null) {
                 if (exist)
                     t = columnType.get(columnNm);
@@ -256,7 +257,7 @@ public abstract class Transfer<E> implements ITransfer {
     void setFieldValue(String field, Object value) {
         try {
             if (value == null)
-                value = _Transfer_.parseNullToValue(fields.get(field));
+                value = TransferExecutor.parseNullToValue(fields.get(field));
             fields.get(field).set(this.entity, value);
         } catch (IllegalAccessException e) {
             System.out.println(this.eClass.getName() + " set value of " + field + " error.");
@@ -293,7 +294,7 @@ public abstract class Transfer<E> implements ITransfer {
         for (E e : collection) {
             beforeInsert(e);
         }
-        BatchExecutor.insertBatch(collection, this);
+        TransferExecutor.insertBatch(collection, this);
     }
 
     List<Object> insertOneBuilder(E e) {
@@ -333,7 +334,7 @@ public abstract class Transfer<E> implements ITransfer {
         for (E e : collection) {
             beforeModify(e);
         }
-        BatchExecutor.modifyBatch(collection, this);
+        TransferExecutor.modifyBatch(collection, this);
     }
 
     List<Object> modifyOneBuilder(E e) {
@@ -384,7 +385,7 @@ public abstract class Transfer<E> implements ITransfer {
         for (E e : collection) {
             beforeDelete(e);
         }
-        BatchExecutor.deleteBatch(collection, this);
+        TransferExecutor.deleteBatch(collection, this);
     }
 
     List<Object> deleteOneBuilder(E e) {
@@ -422,7 +423,7 @@ public abstract class Transfer<E> implements ITransfer {
     }
     @NotNull
     public List<E> query(Collection<E> Collection) {
-        List<E> list = BatchExecutor.queryBatch(Collection, this);
+        List<E> list = TransferExecutor.queryBatch(Collection, this);
         for (E e : list) {
             afterQuery(e);
         }
@@ -479,7 +480,7 @@ public abstract class Transfer<E> implements ITransfer {
     protected List<E> query(String condition, Object... supportedSQLArg) {
         List<E> list = new ArrayList<>();
         try {
-            list = _Transfer_.executeQuery(Boolean.FALSE,0,0,this.select_all + " WHERE " + condition, this, supportedSQLArg);
+            list = TransferExecutor.executeQuery(Boolean.FALSE,0,0,this.select_all + " WHERE " + condition, this, supportedSQLArg);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -498,7 +499,7 @@ public abstract class Transfer<E> implements ITransfer {
     protected List<E> query(int startIndex,int rows,String condition, Object... supportedSQLArg) {
         List<E> list = new ArrayList<>();
         try {
-            list = _Transfer_.executeQuery(Boolean.TRUE,startIndex,rows,this.select_all + " WHERE " + condition, this, supportedSQLArg);
+            list = TransferExecutor.executeQuery(Boolean.TRUE,startIndex,rows,this.select_all + " WHERE " + condition, this, supportedSQLArg);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -509,15 +510,15 @@ public abstract class Transfer<E> implements ITransfer {
     }
 
     protected int executeUpdate(String preparedSql, Object... supportedSQLArg) {
-        return _Transfer_.executeUpdate(getConnection(), preparedSql, supportedSQLArg);
+        return TransferExecutor.executeUpdate(getConnection(), preparedSql, supportedSQLArg);
     }
 
     protected List<Object> firstColumnValues(String preparedSql, Object... supportedSQLArg) {
-        return _Transfer_.firstColumnValues(getConnection(), preparedSql, supportedSQLArg);
+        return TransferExecutor.firstColumnValues(getConnection(), preparedSql, supportedSQLArg);
     }
 
     protected Object getObject(String preparedSql, Object... supportedSQLArg) {
-        return _Transfer_.getObject(getConnection(), preparedSql, supportedSQLArg);
+        return TransferExecutor.getObject(getConnection(), preparedSql, supportedSQLArg);
     }
 
     protected String getString(String preparedSql, Object... supportedSQLArg) {
