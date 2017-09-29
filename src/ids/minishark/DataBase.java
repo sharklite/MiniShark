@@ -48,7 +48,7 @@ public class DataBase {
             set.addAll(ClassesScanner.getClasses(s));
         }
         for(Class key:set){
-            if(ITransfer.class.isAssignableFrom(key))
+            if(TransferBase.class.isAssignableFrom(key))
                 CONFIG_DS.put(key,this.ds);
         }
         set.clear();
