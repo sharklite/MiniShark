@@ -526,12 +526,14 @@ public abstract class Transfer<E> implements ITransfer {
         return o == null ? null : o.toString();
     }
 
-    protected BigDecimal tryBigDecimal(String preparedSql, Object... supportedSQLArg) {
+    protected BigDecimal getBigDecimal(String preparedSql, Object... supportedSQLArg) {
         Object object = this.getObject(preparedSql, supportedSQLArg);
         if (object instanceof BigDecimal) {
             return (BigDecimal) object;
+        }else if(object instanceof Number){
+            return new BigDecimal(object.toString());
         }
-        String s = String.valueOf(object).trim();
+        String s = String.valueOf(object);
         return _String_.isNumeric(s) ? new BigDecimal(s) : null;
     }
 
@@ -539,59 +541,45 @@ public abstract class Transfer<E> implements ITransfer {
         Object object = this.getObject(preparedSql, supportedSQLArg);
         if (object instanceof Boolean)
             return (boolean) object;
-        String s = String.valueOf(object).trim();
+        String s = String.valueOf(object);
         if(_String_.isNumeric(s)){
-            Number number=new BigDecimal(s);
-            return number.intValue()==0;
+            return !(new BigDecimal(s).intValue()==0);
         }
         return Boolean.parseBoolean(s);
     }
 
-    protected byte tryByte(String preparedSql, Object... supportedSQLArg) {
-        Number number = this.tryNumber(preparedSql, supportedSQLArg);
+    protected byte getByte(String preparedSql, Object... supportedSQLArg) {
+        Number number = this.getBigDecimal(preparedSql, supportedSQLArg);
         return number == null ? 0 : number.byteValue();
     }
 
-    protected short tryShort(String preparedSql, Object... supportedSQLArg) {
-        Number number = this.tryNumber(preparedSql, supportedSQLArg);
+    protected short getShort(String preparedSql, Object... supportedSQLArg) {
+        Number number = this.getBigDecimal(preparedSql, supportedSQLArg);
         return number == null ? 0 : number.shortValue();
     }
 
-    protected int tryInt(String preparedSql, Object... supportedSQLArg) {
-        Number number = this.tryNumber(preparedSql, supportedSQLArg);
+    protected int getInt(String preparedSql, Object... supportedSQLArg) {
+        Number number = this.getBigDecimal(preparedSql, supportedSQLArg);
         return number == null ? 0 : number.intValue();
     }
 
-    protected long tryLong(String preparedSql, Object... supportedSQLArg) {
-        Number number = this.tryNumber(preparedSql, supportedSQLArg);
+    protected long getLong(String preparedSql, Object... supportedSQLArg) {
+        Number number = this.getBigDecimal(preparedSql, supportedSQLArg);
         return number == null ? 0 : number.longValue();
     }
 
-    protected double tryDouble(String preparedSql, Object... supportedSQLArg) {
-        Number number = this.tryNumber(preparedSql, supportedSQLArg);
+    protected double getDouble(String preparedSql, Object... supportedSQLArg) {
+        Number number = this.getBigDecimal(preparedSql, supportedSQLArg);
         return number == null ? 0 : number.doubleValue();
     }
 
-    private Number tryNumber(String preparedSql, Object... supportedSQLArg) {
-        Number number = null;
-        Object object = this.getObject(preparedSql, supportedSQLArg);
-        if (object instanceof Number) {
-            number = (Number) object;
-        } else {
-            String s = String.valueOf(object).trim();
-            if (_String_.isNumeric(s))
-                number = new BigDecimal(s);
-        }
-        return number;
-    }
-
-    protected Date tryDate(String preparedSql, Object... supportedSQLArg) {
+    protected Date getDate(String preparedSql, Object... supportedSQLArg) {
         Object object = this.getObject(preparedSql, supportedSQLArg);
         if (object instanceof Date) {
             return (Date) object;
         }
         Number number = null;
-        String s = String.valueOf(object).trim();
+        String s = String.valueOf(object);
         if (_String_.isNumeric(s))
             number = new BigDecimal(s);
         return number == null ? null : new Date(number.longValue());
