@@ -2,6 +2,7 @@ package ids.minishark;
 
 import com.sun.istack.internal.NotNull;
 import ids.minishark.annotation.*;
+
 import javax.sql.DataSource;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -148,11 +149,11 @@ public abstract class Transfer<E> extends TransferBase {
             }
         }
         if (this.dataSource == null) {
-            if(this.dsBySetter){
+            if (this.dsBySetter) {
                 System.err.println("error:dataSource of Transfer<" + this.eClass.getName() + "> is null,by method 'setDataSource'");
-            }else if(DataBase.CONFIG_DS.containsKey(key)){
+            } else if (DataBase.CONFIG_DS.containsKey(key)) {
                 System.err.println("error:there's no dataSource in Transfer<" + this.eClass.getName() + ">");
-            }else {
+            } else {
                 System.err.println("error:there's no default dataSource in Transfer");
             }
             return;
@@ -262,6 +263,7 @@ public abstract class Transfer<E> extends TransferBase {
     }
 
     //CRUD by Primary Keys
+
     /**
      * 插入数据
      */
@@ -403,6 +405,7 @@ public abstract class Transfer<E> extends TransferBase {
         l = this.query(l);
         return l.isEmpty() ? null : l.get(0);
     }
+
     @NotNull
     public List<E> query(Collection<E> Collection) {
         List<E> list = TransferExecutor.queryBatch(Collection, this);
@@ -455,14 +458,14 @@ public abstract class Transfer<E> extends TransferBase {
 
 
     /**
-     * @param condition 按条件查询所有列,不要包含where关键字
+     * @param condition       按条件查询所有列,不要包含where关键字
      * @param supportedSQLArg 可变长参数，与condition中的 ? 对应
      */
     @NotNull
     protected List<E> query(String condition, Object... supportedSQLArg) {
         List<E> list = new ArrayList<>();
         try {
-            list = TransferExecutor.executeQuery(Boolean.FALSE,0,0,this.select_all + " WHERE " + condition, this, supportedSQLArg);
+            list = TransferExecutor.executeQuery(Boolean.FALSE, 0, 0, this.select_all + " WHERE " + condition, this, supportedSQLArg);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -471,17 +474,18 @@ public abstract class Transfer<E> extends TransferBase {
         }
         return list;
     }
+
     /**
-     * @param startIndex 起始列的行数
-     * @param rows 从startIndex开始，查询出多少行
-     * @param condition 按条件查询所有列,不要包含where关键字
+     * @param startIndex      起始列的行数
+     * @param rows            从startIndex开始，查询出多少行
+     * @param condition       按条件查询所有列,不要包含where关键字
      * @param supportedSQLArg 可变长参数，与condition中的 ? 对应
      */
     @NotNull
-    protected List<E> query(int startIndex,int rows,String condition, Object... supportedSQLArg) {
+    protected List<E> query(int startIndex, int rows, String condition, Object... supportedSQLArg) {
         List<E> list = new ArrayList<>();
         try {
-            list = TransferExecutor.executeQuery(Boolean.TRUE,startIndex,rows,this.select_all + " WHERE " + condition, this, supportedSQLArg);
+            list = TransferExecutor.executeQuery(Boolean.TRUE, startIndex, rows, this.select_all + " WHERE " + condition, this, supportedSQLArg);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -492,9 +496,8 @@ public abstract class Transfer<E> extends TransferBase {
     }
 
 
-
     public <T> Transfer<T> getDefault(Class<T> eClass, String table, DataSource dataSource) {
-        Transfer<T> transfer=new DefaultTransfer<>(eClass, table);
+        Transfer<T> transfer = new DefaultTransfer<>(eClass, table);
         transfer.setDataSource(dataSource);
         return transfer;
     }
@@ -504,7 +507,7 @@ public abstract class Transfer<E> extends TransferBase {
     }
 
     public <T> Transfer<T> getDefault(Class<T> eClass, DataSource dataSource) {
-        Transfer<T> transfer=new DefaultTransfer<>(eClass);
+        Transfer<T> transfer = new DefaultTransfer<>(eClass);
         transfer.setDataSource(dataSource);
         return transfer;
     }

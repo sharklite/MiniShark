@@ -16,7 +16,7 @@ abstract class TransferBase {
         return dataSource;
     }
 
-    Connection getConnection() {
+    protected Connection getConnection() {
         Connection c = null;
         try {
             c = this.dataSource.getConnection();
@@ -62,8 +62,8 @@ abstract class TransferBase {
         if (object instanceof Boolean)
             return (boolean) object;
         String s = String.valueOf(object).trim();
-        if (!Boolean.parseBoolean(s) && _Util_.isNumeric(object)) {
-            return !(new BigDecimal(s).compareTo(BigDecimal.ZERO) == 0);
+        if (!Boolean.parseBoolean(s)) {
+            return _Util_.isNumeric(object) && !(new BigDecimal(s).compareTo(BigDecimal.ZERO) == 0);
         }
         return Boolean.TRUE;
     }
