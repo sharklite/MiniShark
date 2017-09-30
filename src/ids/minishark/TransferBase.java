@@ -11,7 +11,7 @@ abstract class TransferBase {
     DataSource dataSource;
 
     abstract void setDataSource(DataSource dataSource);
-    
+
     public DataSource getDataSource() {
         return dataSource;
     }
@@ -26,7 +26,6 @@ abstract class TransferBase {
         }
         return c;
     }
-
 
     protected int executeUpdate(String preparedSql, Object... supportedSQLArg) {
         return TransferExecutor.executeUpdate(getConnection(), preparedSql, supportedSQLArg);
@@ -49,11 +48,13 @@ abstract class TransferBase {
         Object object = this.getObject(preparedSql, supportedSQLArg);
         if (object instanceof BigDecimal) {
             return (BigDecimal) object;
-        }else if(object instanceof Number){
-            return new BigDecimal(object.toString());
+        } else if (object == null) {
+            return null;
         }
         String s = String.valueOf(object);
-        return _String_.isNumeric(s) ? new BigDecimal(s) : null;
+        if (!_Util_.isNumeric(object))
+            throw new NumberFormatException(s + " is NaN.");
+        return new BigDecimal(s);
     }
 
     protected boolean getBoolean(String preparedSql, Object... supportedSQLArg) {
@@ -61,10 +62,12 @@ abstract class TransferBase {
         if (object instanceof Boolean)
             return (boolean) object;
         String s = String.valueOf(object);
-        if(_String_.isNumeric(s)){
-            return !(new BigDecimal(s).intValue()==0);
+        if(!Boolean.parseBoolean(s)){
+            if (_Util_.isNumeric(object)) {
+                return !(new BigDecimal(s).compareTo(BigDecimal.ZERO) == 0);
+            }
         }
-        return Boolean.parseBoolean(s);
+        return Boolean.TRUE;
     }
 
     protected byte getByte(String preparedSql, Object... supportedSQLArg) {
@@ -96,12 +99,13 @@ abstract class TransferBase {
         Object object = this.getObject(preparedSql, supportedSQLArg);
         if (object instanceof Date) {
             return (Date) object;
+        } else if (object == null) {
+            return null;
         }
-        Number number = null;
         String s = String.valueOf(object);
-        if (_String_.isNumeric(s))
-            number = new BigDecimal(s);
-        return number == null ? null : new Date(number.longValue());
+        if (!_Util_.isNumeric(object))
+            throw new NumberFormatException(s + " is NaN.");
+        return new Date(new BigDecimal(s).longValue());
     }
 
 }

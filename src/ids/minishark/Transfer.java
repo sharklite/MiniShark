@@ -150,8 +150,10 @@ public abstract class Transfer<E> extends TransferBase {
         if (this.dataSource == null) {
             if(this.dsBySetter){
                 System.err.println("error:dataSource of Transfer<" + this.eClass.getName() + "> is null,by method 'setDataSource'");
-            }else {
+            }else if(DataBase.CONFIG_DS.containsKey(key)){
                 System.err.println("error:there's no dataSource in Transfer<" + this.eClass.getName() + ">");
+            }else {
+                System.err.println("error:there's no default dataSource in Transfer");
             }
             return;
         }
@@ -555,6 +557,5 @@ public abstract class Transfer<E> extends TransferBase {
         }
         return this.entity;
     }
-
 
 }
