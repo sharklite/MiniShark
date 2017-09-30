@@ -61,11 +61,9 @@ abstract class TransferBase {
         Object object = this.getObject(preparedSql, supportedSQLArg);
         if (object instanceof Boolean)
             return (boolean) object;
-        String s = String.valueOf(object);
-        if(!Boolean.parseBoolean(s)){
-            if (_Util_.isNumeric(object)) {
-                return !(new BigDecimal(s).compareTo(BigDecimal.ZERO) == 0);
-            }
+        String s = String.valueOf(object).trim();
+        if (!Boolean.parseBoolean(s) && _Util_.isNumeric(object)) {
+            return !(new BigDecimal(s).compareTo(BigDecimal.ZERO) == 0);
         }
         return Boolean.TRUE;
     }
