@@ -1,5 +1,7 @@
 package ids.minishark;
 
+import com.sun.istack.internal.NotNull;
+
 import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -31,21 +33,23 @@ abstract class TransferBase {
         return TransferExecutor.executeUpdate(getConnection(), preparedSql, supportedSQLArg);
     }
 
-    protected List<Object> firstColumnValues(String preparedSql, Object... supportedSQLArg) {
-        return TransferExecutor.firstColumnValues(getConnection(), preparedSql, supportedSQLArg);
+    @NotNull
+    @SuppressWarnings("unchecked")
+    protected <T> List<T> firstColumnValues(String preparedSql, Object... supportedSQLArg) {
+        return (List<T>)TransferExecutor.firstColumnValues(getConnection(), preparedSql, supportedSQLArg);
     }
-
-    protected Object getObject(String preparedSql, Object... supportedSQLArg) {
-        return TransferExecutor.getObject(getConnection(), preparedSql, supportedSQLArg);
+    @SuppressWarnings("unchecked")
+    protected <T> T getValue(String preparedSql, Object... supportedSQLArg) {
+        return (T)TransferExecutor.getObject(getConnection(), preparedSql, supportedSQLArg);
     }
 
     protected String getString(String preparedSql, Object... supportedSQLArg) {
-        Object o = this.getObject(preparedSql, supportedSQLArg);
+        Object o = this.getValue(preparedSql, supportedSQLArg);
         return o == null ? null : o.toString();
     }
 
     protected BigDecimal getBigDecimal(String preparedSql, Object... supportedSQLArg) {
-        Object object = this.getObject(preparedSql, supportedSQLArg);
+        Object object = this.getValue(preparedSql, supportedSQLArg);
         if (object instanceof BigDecimal) {
             return (BigDecimal) object;
         } else if (object == null) {
@@ -58,7 +62,7 @@ abstract class TransferBase {
     }
 
     protected boolean getBoolean(String preparedSql, Object... supportedSQLArg) {
-        Object object = this.getObject(preparedSql, supportedSQLArg);
+        Object object = this.getValue(preparedSql, supportedSQLArg);
         if (object instanceof Boolean)
             return (boolean) object;
         String s = String.valueOf(object).trim();
@@ -94,7 +98,7 @@ abstract class TransferBase {
     }
 
     protected Date getDate(String preparedSql, Object... supportedSQLArg) {
-        Object object = this.getObject(preparedSql, supportedSQLArg);
+        Object object = this.getValue(preparedSql, supportedSQLArg);
         if (object instanceof Date) {
             return (Date) object;
         } else if (object == null) {
