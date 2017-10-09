@@ -38,6 +38,7 @@ abstract class TransferBase {
     protected <T> List<T> firstColumnValues(String preparedSql, Object... supportedSQLArg) {
         return (List<T>)TransferExecutor.firstColumnValues(getConnection(), preparedSql, supportedSQLArg);
     }
+
     @SuppressWarnings("unchecked")
     protected <T> T getValue(String preparedSql, Object... supportedSQLArg) {
         return (T)TransferExecutor.getObject(getConnection(), preparedSql, supportedSQLArg);
@@ -61,6 +62,10 @@ abstract class TransferBase {
         return new BigDecimal(s);
     }
 
+    /**
+     * if ResultSet can be cast to number,
+     * 0 is false, others is true
+     */
     protected boolean getBoolean(String preparedSql, Object... supportedSQLArg) {
         Object object = this.getValue(preparedSql, supportedSQLArg);
         if (object instanceof Boolean)
@@ -106,7 +111,7 @@ abstract class TransferBase {
         }
         String s = String.valueOf(object);
         if (!_Util_.isNumeric(object))
-            throw new NumberFormatException(s + " is NaN.");
+            throw new NumberFormatException(s + " is NaN,and "+object+" can't cast to Date");
         return new Date(new BigDecimal(s).longValue());
     }
 
