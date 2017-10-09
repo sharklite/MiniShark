@@ -289,6 +289,7 @@ final class TransferExecutor {
     }
 
     //得到第一列的值
+    @NotNull
     static List<Object> firstColumnValues(Connection conn, String preparedSql, Object... supportedSQLArg) {
         return firstColumnValues(conn, Boolean.FALSE, preparedSql, supportedSQLArg);
     }
