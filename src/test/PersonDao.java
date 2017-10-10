@@ -29,7 +29,12 @@ public class PersonDao extends Transfer<Person> {
 
     @Override
     protected void afterQuery(Person person){
-        person.setName(person.getName()==null?"***":person.getName()+" ---");
+//        person.setName(person.getName()==null?"***":person.getName()+" ---");
+        List<Integer> ids=this.firstColumnValues("select id from person");
+        System.out.println("------------");
+        for(Integer id:ids){
+            System.out.println("------------"+id);
+        }
     }
 
     public List<Person> queryOld() {
@@ -39,5 +44,6 @@ public class PersonDao extends Transfer<Person> {
         calendar.set(Calendar.DAY_OF_MONTH,1);
         return this.query(" birthDay <=? ",new Timestamp(calendar.getTimeInMillis()));
     }
+
 
 }
