@@ -111,7 +111,7 @@ abstract class TransferBase {
         }
         String s = String.valueOf(object);
         if (!_Util_.isNumeric(object))
-            throw new NumberFormatException(s + " is NaN,and "+object+" can't cast to Date");
+            throw new NumberFormatException(s + " is NaN,and "+object+" can't cast to Date.");
         return new Date(new BigDecimal(s).longValue());
     }
 

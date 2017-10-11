@@ -2,6 +2,10 @@ package ids.minishark;
 
 
 final class _Util_ {
+
+    private _Util_(){
+    }
+
     //判断一个字符串是否为数字
     static boolean isNumeric(Object o) {
         if (o == null)

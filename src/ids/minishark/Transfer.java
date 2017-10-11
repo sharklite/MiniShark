@@ -158,7 +158,6 @@ public abstract class Transfer<E> extends TransferBase {
             }
             return;
         }
-
         //通过构造器或注解传入对应的数据库表，以注解传入的表为准
         this.tableName = table;
         Table tableAnnotation = eClass.getAnnotation(Table.class);
@@ -497,9 +496,8 @@ public abstract class Transfer<E> extends TransferBase {
 
 
     public <T> Transfer<T> getDefault(Class<T> eClass, String table, DataSource dataSource) {
-        Transfer<T> transfer = new DefaultTransfer<>(eClass, table);
-        transfer.setDataSource(dataSource);
-        return transfer;
+        DataBase.CONFIG_DS.put(eClass,dataSource);
+        return new DefaultTransfer<>(eClass, table);
     }
 
     public <T> Transfer<T> getDefault(Class<T> eClass, String table) {
@@ -507,9 +505,8 @@ public abstract class Transfer<E> extends TransferBase {
     }
 
     public <T> Transfer<T> getDefault(Class<T> eClass, DataSource dataSource) {
-        Transfer<T> transfer = new DefaultTransfer<>(eClass);
-        transfer.setDataSource(dataSource);
-        return transfer;
+        DataBase.CONFIG_DS.put(eClass,dataSource);
+        return new DefaultTransfer<>(eClass);
     }
 
     public static <T> Transfer<T> getDefault(Class<T> eClass) {
