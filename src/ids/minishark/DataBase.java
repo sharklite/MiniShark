@@ -54,6 +54,18 @@ public class DataBase {
         set.clear();
     }
 
+    public <T extends TransferBase> void setClassConfig(Class<T> tClass){
+        if(TransferBase.class.isAssignableFrom(tClass))
+            CONFIG_DS.put(tClass,this.ds);
+    }
+
+    public <T extends TransferBase> void setClassConfig(Collection<Class<T>> collection){
+        for(Class key:collection){
+            if(TransferBase.class.isAssignableFrom(key))
+                CONFIG_DS.put(key,this.ds);
+        }
+    }
+
     public static void defaultBatch(int batch){
         DataBase.batch=batch;
     }
