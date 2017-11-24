@@ -92,15 +92,6 @@ public abstract class Transfer<E> extends TransferBase {
         return new DefaultTransfer<>(eClass);
     }
 
-    private static String firstAnd(String condition) {
-        String s = condition.trim().toUpperCase();
-        if (s.startsWith("AND"))
-            s = "";
-        else
-            s = " AND ";
-        return " 1=1 " + s + condition;
-    }
-
     @Override
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
@@ -491,6 +482,13 @@ public abstract class Transfer<E> extends TransferBase {
             afterQuery(e);
         }
         return list;
+    }
+
+    private static String firstAnd(String condition) {
+        String s = condition.trim().toUpperCase();
+        if (s.startsWith("AND"))
+            return " 1=1 " + condition;
+        return condition;
     }
 
     public <T> Transfer<T> getDefault(Class<T> eClass, String table, DataSource dataSource) {
