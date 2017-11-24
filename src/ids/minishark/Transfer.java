@@ -17,9 +17,89 @@ public abstract class Transfer<E> extends TransferBase {
     String insert_one;
     String modify_one;
     String delete_one;
+    /**
+     * 用于插入行时，jdbc type按对应顺序保存
+     */
+    List<Integer> jdbcTypeForInsert;
+    /**
+     * 用于修改行时，jdbc type按对应顺序保存
+     */
+    List<Integer> jdbcTypeForModify;
+    /**
+     * 用于删除、查询时时，主键jdbc type按对应顺序保存
+     */
+    List<Integer> pkJdbcType;
+    /**
+     * 表中的主键
+     */
+    Set<String> primaryKeys;
+    /**
+     * E 的类本身
+     */
+    Class<E> eClass;
+    /**
+     * 自增列
+     */
+    String autoIncrementCol;
+    /**
+     * 属性名与属性的对应关系
+     */
+    Map<String, Field> fields;
+    /**
+     * 列名与属性名的对应关系
+     */
+    Map<String, String> colFieldMapper;
     private String select_all;
-
     private boolean dsBySetter = false;//是否是通过setDataSource方法初始化dataSource
+    /**
+     * 数据库表名
+     */
+    private String tableName;
+    /**
+     * 查询所有，所有的列以属性作为别名
+     */
+    private String allColumnLabels;
+    /**
+     * 只读列
+     */
+    private Set<String> readOnlyColumns;
+    /**
+     * E 的实体类
+     */
+    private E entity;
+    /**
+     * 属性对应的数据库jdbc类型
+     */
+    private Map<String, Integer> jdbcTypes;
+
+    /**
+     * 要在 E 上注解配置表名
+     */
+    public Transfer() {
+        this.init(eClassGet(), null);
+    }
+
+    public Transfer(String tableName) {
+        this.init(eClassGet(), tableName);
+    }
+
+    //供getDefault使用
+    Transfer(Class<E> eClass, String tableName) {
+        this.init(eClass, tableName);
+    }
+
+    public static <T> Transfer<T> getDefault(Class<T> eClass) {
+        return new DefaultTransfer<>(eClass);
+    }
+
+    private static String firstAnd(String condition) {
+        String s = condition.trim().toUpperCase();
+        if (s.startsWith("AND"))
+            s = "";
+        else
+            s = " AND ";
+        return " 1=1 " + s + condition;
+    }
 
     @Override
     public void setDataSource(DataSource dataSource) {
@@ -27,71 +107,6 @@ public abstract class Transfer<E> extends TransferBase {
         this.dsBySetter = true;
         this.init(this.eClass, this.tableName);
     }
-
-    /**
-     * 用于插入行时，jdbc type按对应顺序保存
-     */
-    List<Integer> jdbcTypeForInsert;
-
-    /**
-     * 用于修改行时，jdbc type按对应顺序保存
-     */
-    List<Integer> jdbcTypeForModify;
-
-    /**
-     * 用于删除、查询时时，主键jdbc type按对应顺序保存
-     */
-    List<Integer> pkJdbcType;
-
-    /**
-     * 数据库表名
-     */
-    private String tableName;
-
-    /**
-     * 查询所有，所有的列以属性作为别名
-     */
-    private String allColumnLabels;
-
-    /**
-     * 表中的主键
-     */
-    Set<String> primaryKeys;
-
-    /**
-     * 只读列
-     */
-    private Set<String> readOnlyColumns;
-
-    /**
-     * E 的实体类
-     */
-    private E entity;
-
-    /**
-     * E 的类本身
-     */
-    Class<E> eClass;
-
-    /**
-     * 自增列
-     */
-    String autoIncrementCol;
-
-    /**
-     * 属性对应的数据库jdbc类型
-     */
-    private Map<String, Integer> jdbcTypes;
-
-    /**
-     * 属性名与属性的对应关系
-     */
-    Map<String, Field> fields;
-
-    /**
-     * 列名与属性名的对应关系
-     */
-    Map<String, String> colFieldMapper;
 
     /***
      * 查询所有的SQL
@@ -115,23 +130,6 @@ public abstract class Transfer<E> extends TransferBase {
         Class<E> eClass = (Class) params[0];
         return eClass;
     }
-
-    /**
-     * 要在 E 上注解配置表名
-     */
-    public Transfer() {
-        this.init(eClassGet(), null);
-    }
-
-    public Transfer(String tableName) {
-        this.init(eClassGet(), tableName);
-    }
-
-    //供getDefault使用
-    Transfer(Class<E> eClass, String tableName) {
-        this.init(eClass, tableName);
-    }
-
 
     /**
      * java对象与数据库表之间的对应关系
@@ -233,6 +231,8 @@ public abstract class Transfer<E> extends TransferBase {
         this.select_all = "SELECT " + this.allColumnLabels + " FROM " + this.tableName;
     }
 
+    //CRUD by Primary Keys
+
     /**
      * 通过属性名给entity的属性赋值
      */
@@ -260,8 +260,6 @@ public abstract class Transfer<E> extends TransferBase {
         }
         return v;
     }
-
-    //CRUD by Primary Keys
 
     /**
      * 插入数据
@@ -455,7 +453,6 @@ public abstract class Transfer<E> extends TransferBase {
 
     }
 
-
     /**
      * @param condition       按条件查询所有列,不要包含where关键字
      * @param supportedSQLArg 可变长参数，与condition中的 ? 对应
@@ -464,6 +461,7 @@ public abstract class Transfer<E> extends TransferBase {
     protected List<E> query(String condition, Object... supportedSQLArg) {
         List<E> list = new ArrayList<>();
         try {
+            condition = firstAnd(condition);
             list = TransferExecutor.executeQuery(Boolean.FALSE, 0, 0, this.select_all + " WHERE " + condition, this, supportedSQLArg);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
@@ -484,6 +482,7 @@ public abstract class Transfer<E> extends TransferBase {
     protected List<E> query(int startIndex, int rows, String condition, Object... supportedSQLArg) {
         List<E> list = new ArrayList<>();
         try {
+            condition = firstAnd(condition);
             list = TransferExecutor.executeQuery(Boolean.TRUE, startIndex, rows, this.select_all + " WHERE " + condition, this, supportedSQLArg);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
@@ -494,9 +493,8 @@ public abstract class Transfer<E> extends TransferBase {
         return list;
     }
 
-
     public <T> Transfer<T> getDefault(Class<T> eClass, String table, DataSource dataSource) {
-        DataBase.CONFIG_DS.put(eClass,dataSource);
+        DataBase.CONFIG_DS.put(eClass, dataSource);
         return new DefaultTransfer<>(eClass, table);
     }
 
@@ -505,11 +503,7 @@ public abstract class Transfer<E> extends TransferBase {
     }
 
     public <T> Transfer<T> getDefault(Class<T> eClass, DataSource dataSource) {
-        DataBase.CONFIG_DS.put(eClass,dataSource);
-        return new DefaultTransfer<>(eClass);
-    }
-
-    public static <T> Transfer<T> getDefault(Class<T> eClass) {
+        DataBase.CONFIG_DS.put(eClass, dataSource);
         return new DefaultTransfer<>(eClass);
     }
 
