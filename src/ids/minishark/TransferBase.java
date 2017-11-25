@@ -39,6 +39,7 @@ abstract class TransferBase {
         return (List<T>)TransferExecutor.firstColumnValues(getConnection(), preparedSql, supportedSQLArg);
     }
 
+
     @SuppressWarnings("unchecked")
     protected <T> T getValue(String preparedSql, Object... supportedSQLArg) {
         return (T)TransferExecutor.getObject(getConnection(), preparedSql, supportedSQLArg);

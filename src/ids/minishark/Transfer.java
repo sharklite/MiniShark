@@ -50,7 +50,6 @@ public abstract class Transfer<E> extends TransferBase {
      */
     Map<String, String> colFieldMapper;
     private String select_all;
-//    private boolean datasourceBySetter = false;//是否是通过setDataSource方法初始化dataSource
     /**
      * 数据库表名
      */
@@ -94,7 +93,7 @@ public abstract class Transfer<E> extends TransferBase {
 
     private static String firstAnd(String condition) {
         String s = condition.trim().toUpperCase();
-        if (s.startsWith("AND"))
+        if (s.startsWith("AND ")||s.startsWith("ORDER ")||s.startsWith("GROUP "))
             return " 1=1 " + condition;
         return condition;
     }

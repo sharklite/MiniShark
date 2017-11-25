@@ -13,16 +13,16 @@ final class TransferExecutor {
     private TransferExecutor() {
 
     }
-    private static final Set<Class<?>> notNulls =new HashSet<>();
+    private static final Set<Class<?>> NOT_NULLS =new HashSet<>();
 
     static {
-        notNulls.add(byte.class);
-        notNulls.add(short.class);
-        notNulls.add(int.class);
-        notNulls.add(long.class);
-        notNulls.add(float.class);
-        notNulls.add(double.class);
-        notNulls.add(char.class);
+        NOT_NULLS.add(byte.class);
+        NOT_NULLS.add(short.class);
+        NOT_NULLS.add(int.class);
+        NOT_NULLS.add(long.class);
+        NOT_NULLS.add(float.class);
+        NOT_NULLS.add(double.class);
+        NOT_NULLS.add(char.class);
     }
 
     @NotNull
@@ -330,7 +330,7 @@ final class TransferExecutor {
     static Object parseNullToValue(Field field) {
         Object o = null;
         Class c = field.getType();
-        if (notNulls.contains(c)) {
+        if (NOT_NULLS.contains(c)) {
             o = 0;
         } else if (c.equals(boolean.class)) {
             o = false;
