@@ -50,13 +50,13 @@ public abstract class Transfer<E> extends TransferBase {
      */
     Map<String, String> colFieldMapper;
     private String select_all;
-    private boolean dsBySetter = false;//是否是通过setDataSource方法初始化dataSource
+//    private boolean datasourceBySetter = false;//是否是通过setDataSource方法初始化dataSource
     /**
      * 数据库表名
      */
     private String tableName;
     /**
-     * 查询所有，所有的列以属性作为别名
+     * 查询所有，所有的列有注解则以注解值作为别名
      */
     private String allColumnLabels;
     /**
@@ -92,10 +92,20 @@ public abstract class Transfer<E> extends TransferBase {
         return new DefaultTransfer<>(eClass);
     }
 
+    private static String firstAnd(String condition) {
+        String s = condition.trim().toUpperCase();
+        if (s.startsWith("AND"))
+            return " 1=1 " + condition;
+        return condition;
+    }
+
+    protected E getEntity() {
+        return this.entity;
+    }
+
     @Override
-    public void setDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
-        this.dsBySetter = true;
+    protected void setDataSource(DataSource dataSource) {
+        DataBase.CONFIG_DATA_SOURCE.put(this.eClass,dataSource);
         this.init(this.eClass, this.tableName);
     }
 
@@ -122,6 +132,8 @@ public abstract class Transfer<E> extends TransferBase {
         return eClass;
     }
 
+    //CRUD by Primary Keys
+
     /**
      * java对象与数据库表之间的对应关系
      * 包括表的主键、自增列、只读列
@@ -130,17 +142,13 @@ public abstract class Transfer<E> extends TransferBase {
         this.eClass = eClass;
         //配置对应的数据源
         Class<?> key = this.getClass();
-        if (!this.dsBySetter) {
-            if (DataBase.CONFIG_DS.containsKey(key)) {//是否通过包名配置了数据源
-                this.dataSource = DataBase.CONFIG_DS.get(key);
-            } else {
-                this.dataSource = DataBase.defaultDS;
-            }
+        if (DataBase.CONFIG_DATA_SOURCE.containsKey(key)) {//是否通过包名配置了数据源
+            this.dataSource = DataBase.CONFIG_DATA_SOURCE.get(key);
+        } else {
+            this.dataSource = DataBase.defaultDataSource;
         }
         if (this.dataSource == null) {
-            if (this.dsBySetter) {
-                System.err.println("error:dataSource of Transfer<" + this.eClass.getName() + "> is null,by method 'setDataSource'");
-            } else if (DataBase.CONFIG_DS.containsKey(key)) {
+            if (DataBase.CONFIG_DATA_SOURCE.containsKey(key)) {
                 System.err.println("error:there's no dataSource in Transfer<" + this.eClass.getName() + ">");
             } else {
                 System.err.println("error:there's no default dataSource in Transfer");
@@ -163,7 +171,8 @@ public abstract class Transfer<E> extends TransferBase {
         this.readOnlyColumns = column.readOnlyColumns;
         Set<String> columnNames = column.columnClass.keySet();
         Map<String, Integer> columnType = column.columnType;
-
+        //有ColumnAnnotation的Field，用于简化SQL
+        Set<String> hasColumnAnnotation = new HashSet<>();
         //生成属性名与属性，表字段，jdbc类型的映射
         Field[] fs = this.eClass.getDeclaredFields();
         for (Field f : fs) {
@@ -178,6 +187,7 @@ public abstract class Transfer<E> extends TransferBase {
             String columnNm;
             if (columnAnnotation != null) {
                 columnNm = columnAnnotation.value();
+                hasColumnAnnotation.add(columnNm);
             } else {
                 columnNm = fieldName;
             }
@@ -189,14 +199,14 @@ public abstract class Transfer<E> extends TransferBase {
                     this.readOnlyColumns.add(columnNm);
             }
             JdbcType typeAnnotation = f.getAnnotation(JdbcType.class);
-            int t = MappedType.UNDEFINED;
+            int type = MappedType.UNDEFINED;
             if (typeAnnotation == null) {
                 if (exist)
-                    t = columnType.get(columnNm);
+                    type = columnType.get(columnNm);
             } else {
-                t = typeAnnotation.value();
+                type = typeAnnotation.value();
             }
-            jdbcTypes.put(fieldName, t);
+            jdbcTypes.put(fieldName, type);
             //带有ConditionKey注解的Field会被当成有主键对应的列处理
             ConditionKey myPK = f.getAnnotation(ConditionKey.class);
             if (myPK != null && exist)
@@ -204,10 +214,13 @@ public abstract class Transfer<E> extends TransferBase {
         }
         //拼装SQL
         StringBuilder columnAs = new StringBuilder();
-        for (String col : this.colFieldMapper.keySet()) {
-            String label = this.colFieldMapper.get(col);
-            if (label != null)
-                columnAs.append(",").append(col).append(" AS ").append(label);
+        for (String columnName : this.colFieldMapper.keySet()) {
+            String fieldLabel = this.colFieldMapper.get(columnName);
+            if (fieldLabel != null) {
+                columnAs.append(",").append(columnName);
+                if (hasColumnAnnotation.contains(fieldLabel))
+                    columnAs.append(" AS ").append(fieldLabel);
+            }
         }
         this.allColumnLabels = columnAs.substring(1);
         try {
@@ -216,13 +229,12 @@ public abstract class Transfer<E> extends TransferBase {
             this.deleteOneBuilder(e);
             this.queryOneBuilder(e);
             this.insertOneBuilder(e);
-        } catch (ReflectiveOperationException roe) {
-            roe.printStackTrace();
+            this.entity = e;
+        } catch (ReflectiveOperationException ex) {
+            ex.printStackTrace();
         }
         this.select_all = "SELECT " + this.allColumnLabels + " FROM " + this.tableName;
     }
-
-    //CRUD by Primary Keys
 
     /**
      * 通过属性名给entity的属性赋值
@@ -484,15 +496,8 @@ public abstract class Transfer<E> extends TransferBase {
         return list;
     }
 
-    private static String firstAnd(String condition) {
-        String s = condition.trim().toUpperCase();
-        if (s.startsWith("AND"))
-            return " 1=1 " + condition;
-        return condition;
-    }
-
     public <T> Transfer<T> getDefault(Class<T> eClass, String table, DataSource dataSource) {
-        DataBase.CONFIG_DS.put(eClass, dataSource);
+        DataBase.CONFIG_DATA_SOURCE.put(eClass, dataSource);
         return new DefaultTransfer<>(eClass, table);
     }
 
@@ -501,7 +506,7 @@ public abstract class Transfer<E> extends TransferBase {
     }
 
     public <T> Transfer<T> getDefault(Class<T> eClass, DataSource dataSource) {
-        DataBase.CONFIG_DS.put(eClass, dataSource);
+        DataBase.CONFIG_DATA_SOURCE.put(eClass, dataSource);
         return new DefaultTransfer<>(eClass);
     }
 
