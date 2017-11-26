@@ -12,11 +12,11 @@ abstract class TransferBase {
 
     DataSource dataSource;
 
-    abstract void setDataSource(DataSource dataSource);
-
     public DataSource getDataSource() {
         return dataSource;
     }
+
+    abstract void setDataSource(DataSource dataSource);
 
     protected Connection getConnection() {
         Connection c = null;
@@ -36,13 +36,13 @@ abstract class TransferBase {
     @NotNull
     @SuppressWarnings("unchecked")
     protected <T> List<T> firstColumnValues(String preparedSql, Object... supportedSQLArg) {
-        return (List<T>)TransferExecutor.firstColumnValues(getConnection(), preparedSql, supportedSQLArg);
+        return (List<T>) TransferExecutor.firstColumnValues(getConnection(), preparedSql, supportedSQLArg);
     }
 
 
     @SuppressWarnings("unchecked")
     protected <T> T getValue(String preparedSql, Object... supportedSQLArg) {
-        return (T)TransferExecutor.getObject(getConnection(), preparedSql, supportedSQLArg);
+        return (T) TransferExecutor.getObject(getConnection(), preparedSql, supportedSQLArg);
     }
 
     protected String getString(String preparedSql, Object... supportedSQLArg) {
@@ -71,26 +71,22 @@ abstract class TransferBase {
         Object object = this.getValue(preparedSql, supportedSQLArg);
         if (object instanceof Boolean)
             return (boolean) object;
+        else if (object == null)
+            return false;
         String s = String.valueOf(object).trim();
-        if (!Boolean.parseBoolean(s)) {
-            return _Util_.isNumeric(object) && !(new BigDecimal(s).compareTo(BigDecimal.ZERO) == 0);
-        }
-        return Boolean.TRUE;
+        return Boolean.parseBoolean(s) || (_Util_.isNumeric(object) && !(new BigDecimal(s).compareTo(BigDecimal.ZERO) == 0));
     }
 
     protected byte getByte(String preparedSql, Object... supportedSQLArg) {
-        Number number = this.getBigDecimal(preparedSql, supportedSQLArg);
-        return number == null ? 0 : number.byteValue();
+        return (byte) this.getLong(preparedSql, supportedSQLArg);
     }
 
     protected short getShort(String preparedSql, Object... supportedSQLArg) {
-        Number number = this.getBigDecimal(preparedSql, supportedSQLArg);
-        return number == null ? 0 : number.shortValue();
+        return (short) this.getLong(preparedSql, supportedSQLArg);
     }
 
     protected int getInt(String preparedSql, Object... supportedSQLArg) {
-        Number number = this.getBigDecimal(preparedSql, supportedSQLArg);
-        return number == null ? 0 : number.intValue();
+        return (int) this.getLong(preparedSql, supportedSQLArg);
     }
 
     protected long getLong(String preparedSql, Object... supportedSQLArg) {
@@ -112,7 +108,7 @@ abstract class TransferBase {
         }
         String s = String.valueOf(object);
         if (!_Util_.isNumeric(object))
-            throw new NumberFormatException(s + " is NaN,and "+object+" can't cast to Date.");
+            throw new NumberFormatException(s + " is NaN,and " + object + " can't cast to Date.");
         return new Date(new BigDecimal(s).longValue());
     }
 
