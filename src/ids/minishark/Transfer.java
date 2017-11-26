@@ -64,6 +64,7 @@ public abstract class Transfer<E> extends TransferBase {
     private Set<String> readOnlyColumns;
     /**
      * E 的实体类
+     * 始终为 private
      */
     private E entity;
     /**
@@ -98,8 +99,8 @@ public abstract class Transfer<E> extends TransferBase {
         return condition;
     }
 
-    protected E getEntity() {
-        return this.entity;
+    protected Class<E> getEntityClass() {
+        return this.eClass;
     }
 
     @Override
