@@ -74,7 +74,7 @@ abstract class TransferBase {
         else if (object == null)
             return false;
         String s = String.valueOf(object).trim();
-        return Boolean.parseBoolean(s) || (_Util_.isNumeric(object) && !(new BigDecimal(s).compareTo(BigDecimal.ZERO) == 0));
+        return Boolean.parseBoolean(s) || !"0".equals(s);
     }
 
     protected byte getByte(String preparedSql, Object... supportedSQLArg) {
