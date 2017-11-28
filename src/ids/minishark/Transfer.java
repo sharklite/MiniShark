@@ -94,7 +94,7 @@ public abstract class Transfer<E> extends TransferBase {
 
     private static String firstAnd(String condition) {
         String s = condition.trim().toUpperCase();
-        if (s.startsWith("AND ")||s.startsWith("ORDER ")||s.startsWith("GROUP "))
+        if (s.startsWith("AND ") || s.startsWith("ORDER ") || s.startsWith("GROUP "))
             return " 1=1 " + condition;
         return condition;
     }
@@ -105,7 +105,7 @@ public abstract class Transfer<E> extends TransferBase {
 
     @Override
     protected void setDataSource(DataSource dataSource) {
-        DataBase.CONFIG_DATA_SOURCE.put(this.eClass,dataSource);
+        DataBase.CONFIG_DATA_SOURCE.put(this.eClass, dataSource);
         this.init(this.eClass, this.tableName);
     }
 
@@ -276,7 +276,8 @@ public abstract class Transfer<E> extends TransferBase {
 
     public void insert(Collection<E> collection) {
         for (E e : collection) {
-            beforeInsert(e);
+            if (e != null)
+                beforeInsert(e);
         }
         TransferExecutor.insertBatch(collection, this);
     }
@@ -316,7 +317,8 @@ public abstract class Transfer<E> extends TransferBase {
 
     public void modify(Collection<E> collection) {
         for (E e : collection) {
-            beforeModify(e);
+            if (e != null)
+                beforeModify(e);
         }
         TransferExecutor.modifyBatch(collection, this);
     }
@@ -367,7 +369,8 @@ public abstract class Transfer<E> extends TransferBase {
 
     public void delete(Collection<E> collection) {
         for (E e : collection) {
-            beforeDelete(e);
+            if (e != null)
+                beforeDelete(e);
         }
         TransferExecutor.deleteBatch(collection, this);
     }
@@ -410,7 +413,8 @@ public abstract class Transfer<E> extends TransferBase {
     public List<E> query(Collection<E> Collection) {
         List<E> list = TransferExecutor.queryBatch(Collection, this);
         for (E e : list) {
-            afterQuery(e);
+            if (e != null)
+                afterQuery(e);
         }
         return list;
     }
