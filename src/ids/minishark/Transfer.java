@@ -344,7 +344,7 @@ public abstract class Transfer<E> extends TransferBase {
                 String field = this.colFieldMapper.get(col);
                 valueList.add(getFieldValue(field));
                 if (this.modify_one == null || this.jdbcTypeForModify == null) {
-                    whereByPK.append(",And ").append(col).append("=?");
+                    whereByPK.append(" And ").append(col).append("=?");
                     jdbcTypeList.add(jdbcTypes.get(field));
                 }
             }
@@ -385,7 +385,7 @@ public abstract class Transfer<E> extends TransferBase {
                 String field = this.colFieldMapper.get(pk);
                 valuesList.add(getFieldValue(field));
                 if (this.delete_one == null || this.pkJdbcType == null) {
-                    where.append(",And ").append(pk).append("=?");
+                    where.append(" And ").append(pk).append("=?");
                     jdbcTypeList.add(jdbcTypes.get(field));
                 }
             }
