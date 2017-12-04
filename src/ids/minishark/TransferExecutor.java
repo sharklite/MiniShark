@@ -33,6 +33,8 @@ final class TransferExecutor {
         Connection conn = transfer.getConnection();
         try {
             for (T entity : collection) {
+                if(entity==null)
+                    continue;
                 List<Object> values = transfer.queryOneBuilder(entity);
                 PreparedStatement pst = conn.prepareStatement(transfer.select_one);
                 TransferExecutor.invokePreparedStatement(pst, values, transfer.pkJdbcType);
@@ -66,6 +68,8 @@ final class TransferExecutor {
             pst = conn.prepareStatement(transfer.modify_one);
             int i = batch + 1;
             for (T entity : collection) {
+                if(entity==null)
+                    continue;
                 List<Object> values = transfer.modifyOneBuilder(entity);
                 TransferExecutor.invokePreparedStatement(pst, values, transfer.jdbcTypeForModify);
                 pst.addBatch();
@@ -101,6 +105,8 @@ final class TransferExecutor {
             pst = conn.prepareStatement(transfer.delete_one);
             int i = batch + 1;
             for (T entity : collection) {
+                if(entity==null)
+                    continue;
                 List<Object> values = transfer.deleteOneBuilder(entity);
                 TransferExecutor.invokePreparedStatement(pst, values, transfer.pkJdbcType);
                 pst.addBatch();
@@ -136,6 +142,8 @@ final class TransferExecutor {
         try {
             pst = conn.prepareStatement(transfer.insert_one, PreparedStatement.RETURN_GENERATED_KEYS);
             for (T entity : collection) {
+                if(entity==null)
+                    continue;
                 List<Object> values = transfer.insertOneBuilder(entity);
                 TransferExecutor.invokePreparedStatement(pst, values, transfer.jdbcTypeForInsert);
                 pst.executeUpdate();
