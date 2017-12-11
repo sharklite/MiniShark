@@ -275,10 +275,6 @@ public abstract class Transfer<E> extends TransferBase {
     }
 
     public void insert(Collection<E> collection) {
-        for (E e : collection) {
-            if (e != null)
-                beforeInsert(e);
-        }
         TransferExecutor.insertBatch(collection, this);
     }
 
@@ -316,10 +312,6 @@ public abstract class Transfer<E> extends TransferBase {
     }
 
     public void modify(Collection<E> collection) {
-        for (E e : collection) {
-            if (e != null)
-                beforeModify(e);
-        }
         TransferExecutor.modifyBatch(collection, this);
     }
 
@@ -368,10 +360,6 @@ public abstract class Transfer<E> extends TransferBase {
     }
 
     public void delete(Collection<E> collection) {
-        for (E e : collection) {
-            if (e != null)
-                beforeDelete(e);
-        }
         TransferExecutor.deleteBatch(collection, this);
     }
 
@@ -440,19 +428,6 @@ public abstract class Transfer<E> extends TransferBase {
             }
         }
         return values;
-    }
-
-    //在delete, modify, insert前，对entity进行操作
-    protected void beforeDelete(E entity) {
-
-    }
-
-    protected void beforeInsert(E entity) {
-
-    }
-
-    protected void beforeModify(E entity) {
-
     }
 
     //在查询出结果后，对entity进行操作
