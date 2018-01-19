@@ -8,12 +8,8 @@ import java.util.*;
 
 final class TransferExecutor {
 
+    private static final Set<Class<?>> NOT_NULLS = new HashSet<>();
     private static int batch = DataBase.batch;
-
-    private TransferExecutor() {
-
-    }
-    private static final Set<Class<?>> NOT_NULLS =new HashSet<>();
 
     static {
         NOT_NULLS.add(byte.class);
@@ -25,6 +21,10 @@ final class TransferExecutor {
         NOT_NULLS.add(char.class);
     }
 
+    private TransferExecutor() {
+
+    }
+
     @NotNull
     static <T> List<T> queryBatch(Collection<T> collection, Transfer<T> transfer) {
         List<T> list = new ArrayList<>();
@@ -33,7 +33,7 @@ final class TransferExecutor {
         Connection conn = transfer.getConnection();
         try {
             for (T entity : collection) {
-                if(entity==null)
+                if (entity == null)
                     continue;
                 List<Object> values = transfer.queryOneBuilder(entity);
                 PreparedStatement pst = conn.prepareStatement(transfer.select_one);
@@ -68,7 +68,7 @@ final class TransferExecutor {
             pst = conn.prepareStatement(transfer.modify_one);
             int i = batch + 1;
             for (T entity : collection) {
-                if(entity==null)
+                if (entity == null)
                     continue;
                 List<Object> values = transfer.modifyOneBuilder(entity);
                 TransferExecutor.invokePreparedStatement(pst, values, transfer.jdbcTypeForModify);
@@ -105,7 +105,7 @@ final class TransferExecutor {
             pst = conn.prepareStatement(transfer.delete_one);
             int i = batch + 1;
             for (T entity : collection) {
-                if(entity==null)
+                if (entity == null)
                     continue;
                 List<Object> values = transfer.deleteOneBuilder(entity);
                 TransferExecutor.invokePreparedStatement(pst, values, transfer.pkJdbcType);
@@ -142,7 +142,7 @@ final class TransferExecutor {
         try {
             pst = conn.prepareStatement(transfer.insert_one, PreparedStatement.RETURN_GENERATED_KEYS);
             for (T entity : collection) {
-                if(entity==null)
+                if (entity == null)
                     continue;
                 List<Object> values = transfer.insertOneBuilder(entity);
                 TransferExecutor.invokePreparedStatement(pst, values, transfer.jdbcTypeForInsert);
@@ -189,7 +189,7 @@ final class TransferExecutor {
     }
 
 
-    static <T> List<T> executeQuery(boolean byPage, int startIndex, int rows, String preparedSql, Transfer<T> transfer, Object... supportedSQLArg) throws IllegalAccessException {
+    static <T> List<T> executeQuery(boolean byPage, int startIndex, int rows, String preparedSql, Transfer<T> transfer, Object... supportedSQLArg) {
         List<T> list = new ArrayList<>();
         Set<String> set = new HashSet<>();
         PreparedStatement pst = null;

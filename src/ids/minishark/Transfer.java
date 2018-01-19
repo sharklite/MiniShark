@@ -401,8 +401,7 @@ public abstract class Transfer<E> extends TransferBase {
     public List<E> query(Collection<E> Collection) {
         List<E> list = TransferExecutor.queryBatch(Collection, this);
         for (E e : list) {
-            if (e != null)
-                afterQuery(e);
+            afterQuery(e);
         }
         return list;
     }
@@ -441,13 +440,8 @@ public abstract class Transfer<E> extends TransferBase {
      */
     @NotNull
     protected List<E> query(String condition, Object... supportedSQLArg) {
-        List<E> list = new ArrayList<>();
-        try {
-            condition = firstAnd(condition);
-            list = TransferExecutor.executeQuery(Boolean.FALSE, 0, 0, this.select_all + " WHERE " + condition, this, supportedSQLArg);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
+        condition = firstAnd(condition);
+        List<E> list = TransferExecutor.executeQuery(Boolean.FALSE, 0, 0, this.select_all + " WHERE " + condition, this, supportedSQLArg);
         for (E e : list) {
             afterQuery(e);
         }
@@ -462,13 +456,8 @@ public abstract class Transfer<E> extends TransferBase {
      */
     @NotNull
     protected List<E> query(int startIndex, int rows, String condition, Object... supportedSQLArg) {
-        List<E> list = new ArrayList<>();
-        try {
-            condition = firstAnd(condition);
-            list = TransferExecutor.executeQuery(Boolean.TRUE, startIndex, rows, this.select_all + " WHERE " + condition, this, supportedSQLArg);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
+        condition = firstAnd(condition);
+        List<E> list = TransferExecutor.executeQuery(Boolean.TRUE, startIndex, rows, this.select_all + " WHERE " + condition, this, supportedSQLArg);
         for (E e : list) {
             afterQuery(e);
         }
