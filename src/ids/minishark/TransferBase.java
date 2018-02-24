@@ -39,7 +39,6 @@ abstract class TransferBase {
         return (List<T>) TransferExecutor.firstColumnValues(getConnection(), preparedSql, supportedSQLArg);
     }
 
-
     @SuppressWarnings("unchecked")
     protected <T> T getValue(String preparedSql, Object... supportedSQLArg) {
         return (T) TransferExecutor.getObject(getConnection(), preparedSql, supportedSQLArg);
@@ -74,7 +73,7 @@ abstract class TransferBase {
         else if (object == null)
             return false;
         String s = String.valueOf(object).trim();
-        return Boolean.parseBoolean(s) || (s.length()!=0 && !"0".equals(s));
+        return Boolean.parseBoolean(s) || (_Util_.isNumeric(s) && !"0".equals(s));
     }
 
     protected byte getByte(String preparedSql, Object... supportedSQLArg) {

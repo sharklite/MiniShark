@@ -217,9 +217,7 @@ public abstract class Transfer<E> extends TransferBase {
         for (String columnName : this.colFieldMapper.keySet()) {
             String fieldLabel = this.colFieldMapper.get(columnName);
             if (fieldLabel != null) {
-                columnAs.append(",").append(columnName);
-                if (hasColumnAnnotation.contains(fieldLabel))
-                    columnAs.append(" AS ").append(fieldLabel);
+                columnAs.append(",").append(columnName).append(" AS ").append(fieldLabel);
             }
         }
         this.allColumnLabels = columnAs.substring(1);
@@ -234,6 +232,7 @@ public abstract class Transfer<E> extends TransferBase {
             ex.printStackTrace();
         }
         this.select_all = "SELECT " + this.allColumnLabels + " FROM " + this.tableName;
+        
     }
 
     /**
