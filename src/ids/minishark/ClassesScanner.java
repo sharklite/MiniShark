@@ -17,9 +17,10 @@ class ClassesScanner {
 
     static Set<Class<?>> getClasses(String packageName) {
         Set<Class<?>> classes = new HashSet<>();
-        String classNames = packageName;
+        packageName = packageName.trim();
+        String classNames = packageName.trim();
         // 获取包的名字 并进行替换
-        String packageDirName = packageName.replace(".*", "").replace("/*", "").replace('.', '/');
+        String packageDirName = packageName.replaceAll("\\.", "/").replaceAll("/\\*", "");
         Enumeration<URL> dirs;
         try {
             dirs = Thread.currentThread().getContextClassLoader().getResources(packageDirName);

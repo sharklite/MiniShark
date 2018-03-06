@@ -232,7 +232,7 @@ public abstract class Transfer<E> extends TransferBase {
             ex.printStackTrace();
         }
         this.select_all = "SELECT " + this.allColumnLabels + " FROM " + this.tableName;
-        
+
     }
 
     /**
