@@ -2,10 +2,6 @@ package ids.minishark;
 
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.*;
 
 public class DataBase {
@@ -34,34 +30,16 @@ public class DataBase {
         defaultDataSource = dataSource;
     }
 
-    static void close(Connection c) {
+
+    static void close(AutoCloseable closeable) {
         try {
-            if (c != null) {
-                c.setAutoCommit(true);
-                c.close();
-            }
-        } catch (SQLException e) {
+            if (closeable != null)
+                closeable.close();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    static void close(ResultSet rs) {
-        try {
-            if (rs != null)
-                rs.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    static void close(Statement statement) {
-        try {
-            if (statement != null)
-                statement.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
     public void setDataSource(DataSource dataSource) {
         this.ds = dataSource;

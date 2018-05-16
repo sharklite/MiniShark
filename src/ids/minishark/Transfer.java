@@ -172,7 +172,7 @@ public abstract class Transfer<E> extends TransferBase {
         Set<String> columnNames = column.columnClass.keySet();
         Map<String, Integer> columnType = column.columnType;
         //有ColumnAnnotation的Field，用于简化SQL
-        Set<String> hasColumnAnnotation = new HashSet<>();
+//        Set<String> hasColumnAnnotation = new HashSet<>();
         //生成属性名与属性，表字段，jdbc类型的映射
         Field[] fs = this.eClass.getDeclaredFields();
         for (Field f : fs) {
@@ -187,7 +187,7 @@ public abstract class Transfer<E> extends TransferBase {
             String columnNm;
             if (columnAnnotation != null) {
                 columnNm = columnAnnotation.value();
-                hasColumnAnnotation.add(columnNm);
+//                hasColumnAnnotation.add(columnNm);
             } else {
                 columnNm = fieldName;
             }
@@ -238,13 +238,17 @@ public abstract class Transfer<E> extends TransferBase {
     /**
      * 通过属性名给entity的属性赋值
      */
-    void setFieldValue(String field, Object value) {
+    void setFieldValue(String fieldName, Object value) {
         try {
             if (value == null)
-                value = TransferExecutor.parseNullToValue(fields.get(field));
-            fields.get(field).set(this.entity, value);
+                value = TransferExecutor.parseNullToValue(fields.get(fieldName));
+            Field field=fields.get(fieldName);
+            if (boolean.class.equals(field.getType())||Boolean.class.equals(field.getType())) {
+                value = _Util_.toBoolean(value);
+            }
+            field.set(this.entity, value);
         } catch (IllegalAccessException e) {
-            System.out.println(this.eClass.getName() + " set value of " + field + " error.");
+            System.out.println(this.eClass.getName() + " set value of " + fieldName + " error.");
             e.printStackTrace();
         }
     }

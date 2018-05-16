@@ -68,12 +68,7 @@ abstract class TransferBase {
      */
     protected boolean getBoolean(String preparedSql, Object... supportedSQLArg) {
         Object object = this.getValue(preparedSql, supportedSQLArg);
-        if (object instanceof Boolean)
-            return (boolean) object;
-        else if (object == null)
-            return false;
-        String s = String.valueOf(object).trim();
-        return Boolean.parseBoolean(s) || (_Util_.isNumeric(s) && !"0".equals(s));
+        return _Util_.toBoolean(object);
     }
 
     protected byte getByte(String preparedSql, Object... supportedSQLArg) {

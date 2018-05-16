@@ -99,6 +99,7 @@ final class TransferExecutor {
     static <T> void deleteBatch(Collection<T> collection, Transfer<T> transfer) {
         if (collection.size() == 0 || transfer.primaryKeys.size() == 0)
             return;
+
         Connection conn = transfer.getConnection();
         PreparedStatement pst = null;
         try {
@@ -237,6 +238,9 @@ final class TransferExecutor {
     private static void entityFieldValueSet(Field field, Object entity, Object value) throws IllegalAccessException {
         if (value == null)
             value = parseNullToValue(field);
+        if (boolean.class.equals(field.getType())||Boolean.class.equals(field.getType())) {
+            value = _Util_.toBoolean(value);
+        }
         field.set(entity, value);
     }
 

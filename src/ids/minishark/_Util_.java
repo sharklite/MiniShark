@@ -19,4 +19,15 @@ final class _Util_ {
     }
 
 
+    //将一个对象转换为boolean
+    static boolean toBoolean(Object o) {
+        if (o instanceof Boolean)
+            return (boolean) o;
+        else if (o == null)
+            return false;
+        String v = String.valueOf(o).trim();
+        return Boolean.parseBoolean(v) || (_Util_.isNumeric(v) && !"0".equals(v));
+    }
+
+
 }
