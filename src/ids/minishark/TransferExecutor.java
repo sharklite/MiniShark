@@ -239,7 +239,7 @@ final class TransferExecutor {
         if (value == null)
             value = parseNullToValue(field);
         if (boolean.class.equals(field.getType())||Boolean.class.equals(field.getType())) {
-            value = _Util_.toBoolean(value);
+            value = Util.toBoolean(value);
         }
         field.set(entity, value);
     }

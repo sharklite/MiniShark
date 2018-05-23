@@ -1,9 +1,9 @@
 package ids.minishark;
 
 
-final class _Util_ {
+final class Util {
 
-    private _Util_(){
+    private Util() {
     }
 
     //判断一个字符串是否为数字
@@ -13,7 +13,6 @@ final class _Util_ {
             String s = o.toString().trim();
             f = s.length() != 0 &&
                     (s.matches("^[-+]?(([0-9]+)([.]([0-9]+))?|([0-9]+)[.]|([.]([0-9]+))?)$") || s.matches("^([-+]?\\d+.?\\d*)[Ee]([-+]?\\d+)$"));
-
         }
         return f;
     }
@@ -26,8 +25,7 @@ final class _Util_ {
         else if (o == null)
             return false;
         String v = String.valueOf(o).trim();
-        return Boolean.parseBoolean(v) || (_Util_.isNumeric(v) && !"0".equals(v));
+        return Boolean.parseBoolean(v) || (Util.isNumeric(v) && !"0".equals(v));
     }
-
 
 }

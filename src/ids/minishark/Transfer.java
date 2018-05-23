@@ -244,7 +244,7 @@ public abstract class Transfer<E> extends TransferBase {
                 value = TransferExecutor.parseNullToValue(fields.get(fieldName));
             Field field=fields.get(fieldName);
             if (boolean.class.equals(field.getType())||Boolean.class.equals(field.getType())) {
-                value = _Util_.toBoolean(value);
+                value = Util.toBoolean(value);
             }
             field.set(this.entity, value);
         } catch (IllegalAccessException e) {
