@@ -2,6 +2,7 @@ package ids.minishark;
 
 
 import javax.sql.DataSource;
+import java.sql.Connection;
 import java.util.*;
 
 public class DataBase {
@@ -33,6 +34,8 @@ public class DataBase {
 
     static void close(AutoCloseable closeable) {
         try {
+            if(closeable instanceof Connection)
+                ((Connection) closeable).setAutoCommit(true);
             if (closeable != null)
                 closeable.close();
         } catch (Exception e) {

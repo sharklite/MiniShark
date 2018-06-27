@@ -18,7 +18,7 @@ abstract class TransferBase {
 
     abstract void setDataSource(DataSource dataSource);
 
-    protected Connection getConnection() {
+    Connection getConnection() {
         Connection c = null;
         try {
             c = this.dataSource.getConnection();

@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.*;
 
+
 final class TransferExecutor {
 
     private static final Set<Class<?>> NOT_NULLS = new HashSet<>();
@@ -58,13 +59,12 @@ final class TransferExecutor {
         return list;
     }
 
-
     static <T> void modifyBatch(Collection<T> collection, Transfer<T> transfer) {
         if (collection.size() == 0 || transfer.primaryKeys.size() == 0)
             return;
         Connection conn = transfer.getConnection();
         PreparedStatement pst = null;
-        try {
+        try{
             pst = conn.prepareStatement(transfer.modify_one);
             int i = batch + 1;
             for (T entity : collection) {
@@ -95,11 +95,9 @@ final class TransferExecutor {
         }
     }
 
-
     static <T> void deleteBatch(Collection<T> collection, Transfer<T> transfer) {
         if (collection.size() == 0 || transfer.primaryKeys.size() == 0)
             return;
-
         Connection conn = transfer.getConnection();
         PreparedStatement pst = null;
         try {
@@ -132,7 +130,6 @@ final class TransferExecutor {
             DataBase.close(conn);
         }
     }
-
 
     static <T> void insertBatch(Collection<T> collection, Transfer<T> transfer) {
         if (collection.size() == 0 || transfer.primaryKeys.size() == 0)
@@ -188,7 +185,6 @@ final class TransferExecutor {
             DataBase.close(conn);
         }
     }
-
 
     static <T> List<T> executeQuery(boolean byPage, int startIndex, int rows, String preparedSql, Transfer<T> transfer, Object... supportedSQLArg) {
         List<T> list = new ArrayList<>();
@@ -330,6 +326,7 @@ final class TransferExecutor {
         }
     }
 
+
     private static void invokePreparedStatement(PreparedStatement pst, int index, Object object) throws SQLException {
         int code = MappedType.tryFrom(object);
         if (code == MappedType.UNDEFINED)
@@ -337,6 +334,7 @@ final class TransferExecutor {
         else
             pst.setObject(index, object, code);
     }
+
 
     //根据类型得到基本类型的默认值
     static Object parseNullToValue(Field field) {
@@ -349,4 +347,5 @@ final class TransferExecutor {
         }
         return o;
     }
+
 }
