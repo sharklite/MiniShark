@@ -73,6 +73,11 @@ public abstract class Transfer<E> extends TransferBase {
     private Map<String, Integer> jdbcTypes;
 
     /**
+     * 不从属性对应的数据库列读取
+     */
+    Set<String> notReads;
+
+    /**
      * 要在 E 上注解配置表名
      */
     public Transfer() {
@@ -133,7 +138,6 @@ public abstract class Transfer<E> extends TransferBase {
     }
 
     //CRUD by Primary Keys
-
     /**
      * java对象与数据库表之间的对应关系
      * 包括表的主键、自增列、只读列
@@ -155,6 +159,7 @@ public abstract class Transfer<E> extends TransferBase {
             }
             return;
         }
+        notReads=new HashSet<>();
         //通过构造器或注解传入对应的数据库表，以注解传入的表为准
         this.tableName = table;
         Table tableAnnotation = eClass.getAnnotation(Table.class);
@@ -171,6 +176,8 @@ public abstract class Transfer<E> extends TransferBase {
         this.readOnlyColumns = column.readOnlyColumns;
         Set<String> columnNames = column.columnClass.keySet();
         Map<String, Integer> columnType = column.columnType;
+
+
         //有ColumnAnnotation的Field，用于简化SQL
 //        Set<String> hasColumnAnnotation = new HashSet<>();
         //生成属性名与属性，表字段，jdbc类型的映射
@@ -184,6 +191,7 @@ public abstract class Transfer<E> extends TransferBase {
             //当fieldName与columnName不同时，用注解Column设置正确的columnName以保证正确映射
             ReadOnly readOnly = f.getAnnotation(ReadOnly.class);
             Column columnAnnotation = f.getAnnotation(Column.class);
+            Unread notRead=f.getAnnotation(Unread.class);
             String columnNm;
             if (columnAnnotation != null) {
                 columnNm = columnAnnotation.value();
@@ -197,6 +205,8 @@ public abstract class Transfer<E> extends TransferBase {
                 this.colFieldMapper.put(columnNm, fieldName);
                 if (readOnly != null)
                     this.readOnlyColumns.add(columnNm);
+                if(notRead!=null)
+                    notReads.add(columnNm);
             }
             JdbcType typeAnnotation = f.getAnnotation(JdbcType.class);
             int type = MappedType.UNDEFINED;
@@ -216,7 +226,7 @@ public abstract class Transfer<E> extends TransferBase {
         StringBuilder columnAs = new StringBuilder();
         for (String columnName : this.colFieldMapper.keySet()) {
             String fieldLabel = this.colFieldMapper.get(columnName);
-            if (fieldLabel != null) {
+            if (fieldLabel != null && !notReads.contains(columnName)) {
                 columnAs.append(",").append(columnName).append(" AS ").append(fieldLabel);
             }
         }
@@ -232,7 +242,6 @@ public abstract class Transfer<E> extends TransferBase {
             ex.printStackTrace();
         }
         this.select_all = "SELECT " + this.allColumnLabels + " FROM " + this.tableName;
-
     }
 
     /**
@@ -345,7 +354,7 @@ public abstract class Transfer<E> extends TransferBase {
             }
             if (whereByPK.length() != 0) {
                 if (this.modify_one == null || this.jdbcTypeForInsert == null) {
-                    this.modify_one = "UPDATE " + this.tableName + " SET " + sets.toString().substring(1) + "  WHERE 1=1 " + whereByPK.substring(1);
+                    this.modify_one = "UPDATE " + this.tableName + " SET " + sets.toString().substring(1) + "  WHERE " + firstAnd(whereByPK.substring(1));
                     this.jdbcTypeForModify = jdbcTypeList;
                 }
             }
@@ -382,7 +391,7 @@ public abstract class Transfer<E> extends TransferBase {
             }
             if (where.length() != 0) {
                 if (this.delete_one == null || this.primaryKeys == null) {
-                    this.delete_one = "DELETE FROM " + this.tableName + " WHERE 1=1 " + where.substring(1);
+                    this.delete_one = "DELETE FROM " + this.tableName + " WHERE " + firstAnd(where.substring(1));
                     this.pkJdbcType = jdbcTypeList;
                 }
             }
@@ -425,7 +434,7 @@ public abstract class Transfer<E> extends TransferBase {
             }
             //select * 的具体字段
             if (this.select_one == null || this.pkJdbcType == null) {
-                this.select_one = "SELECT " + this.allColumnLabels + " FROM " + this.tableName + " WHERE 1=1 " + where.substring(1);
+                this.select_one = "SELECT " + this.allColumnLabels + " FROM " + this.tableName + " WHERE " + firstAnd(where.substring(1));
                 this.pkJdbcType = types;
             }
         }
