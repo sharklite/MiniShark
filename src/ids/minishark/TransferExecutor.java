@@ -42,12 +42,9 @@ final class TransferExecutor {
                 ResultSet rs = pst.executeQuery();
                 while (rs.next()) {
                     list.add(entity);
-                    for (String col : transfer.colFieldMapper.keySet()) {
-                        String label = transfer.colFieldMapper.get(col);
-                        if (!transfer.notReads.contains(col)) {
-                            Object v = rs.getObject(label);
-                            transfer.setFieldValue(label, v);
-                        }
+                    for (String label : transfer.colFieldMapper.values()) {
+                        Object v = rs.getObject(label);
+                        transfer.setFieldValue(label, v);
                     }
                 }
                 DataBase.close(rs);
@@ -67,7 +64,7 @@ final class TransferExecutor {
             return;
         Connection conn = transfer.getConnection();
         PreparedStatement pst = null;
-        try {
+        try{
             pst = conn.prepareStatement(transfer.modify_one);
             int i = batch + 1;
             for (T entity : collection) {
@@ -237,7 +234,7 @@ final class TransferExecutor {
     private static void entityFieldValueSet(Field field, Object entity, Object value) throws IllegalAccessException {
         if (value == null)
             value = parseNullToValue(field);
-        if (boolean.class.equals(field.getType()) || Boolean.class.equals(field.getType())) {
+        if (boolean.class.equals(field.getType())||Boolean.class.equals(field.getType())) {
             value = Util.toBoolean(value);
         }
         field.set(entity, value);
