@@ -25,7 +25,7 @@ final class Util {
         else if (o == null)
             return false;
         String v = String.valueOf(o).trim();
-        return Boolean.parseBoolean(v) || (Util.isNumeric(v) && !"0".equals(v));
+        return Boolean.parseBoolean(v) || (!"0".equals(v) && isNumeric(v));
     }
 
 }
