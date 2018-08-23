@@ -15,7 +15,7 @@ public abstract class Transfer<E> extends TransferBase {
     //CRUD语句，带 '?'
     String select_one;
     String insert_one;
-    String modify_one;
+    String update_one;
     String delete_one;
     /**
      * 用于插入行时，jdbc type按对应顺序保存
@@ -24,7 +24,7 @@ public abstract class Transfer<E> extends TransferBase {
     /**
      * 用于修改行时，jdbc type按对应顺序保存
      */
-    List<Integer> jdbcTypeForModify;
+    List<Integer> jdbcTypeForUpdate;
     /**
      * 用于删除、查询时时，主键jdbc type按对应顺序保存
      */
@@ -49,6 +49,10 @@ public abstract class Transfer<E> extends TransferBase {
      * 列名与属性名的对应关系
      */
     Map<String, String> colFieldMapper;
+    /**
+     * 不从属性对应的数据库列读取
+     */
+    Set<String> notReads;
     private String select_all;
     /**
      * 数据库表名
@@ -73,11 +77,6 @@ public abstract class Transfer<E> extends TransferBase {
     private Map<String, Integer> jdbcTypes;
 
     /**
-     * 不从属性对应的数据库列读取
-     */
-    Set<String> notReads;
-
-    /**
      * 要在 E 上注解配置表名
      */
     public Transfer() {
@@ -97,11 +96,22 @@ public abstract class Transfer<E> extends TransferBase {
         return new DefaultTransfer<>(eClass);
     }
 
-    private static String firstAnd(String condition) {
-        String s = condition.trim().toUpperCase();
-        if (s.startsWith("AND ") || s.startsWith("ORDER ") || s.startsWith("GROUP "))
+    private static String addFirstAnd(String condition) {
+        condition = condition.trim();
+        String s = condition.toUpperCase();
+        if (s.startsWith("AND ") || s.startsWith("ORDER ") || s.startsWith("GROUP ")) {
             return " 1=1 " + condition;
-        return condition;
+        }
+        return ' '+condition;
+    }
+
+    private static String removeFirstAnd(String where) {
+        String res = where.trim();
+        String andFirst = res.toUpperCase().substring(0,4);
+        if ("And ".equalsIgnoreCase(andFirst)) {
+            return res.substring(4);
+        }
+        return where;
     }
 
     protected Class<E> getEntityClass() {
@@ -138,6 +148,7 @@ public abstract class Transfer<E> extends TransferBase {
     }
 
     //CRUD by Primary Keys
+
     /**
      * java对象与数据库表之间的对应关系
      * 包括表的主键、自增列、只读列
@@ -159,7 +170,7 @@ public abstract class Transfer<E> extends TransferBase {
             }
             return;
         }
-        notReads=new HashSet<>();
+        notReads = new HashSet<>();
         //通过构造器或注解传入对应的数据库表，以注解传入的表为准
         this.tableName = table;
         Table tableAnnotation = eClass.getAnnotation(Table.class);
@@ -191,7 +202,7 @@ public abstract class Transfer<E> extends TransferBase {
             //当fieldName与columnName不同时，用注解Column设置正确的columnName以保证正确映射
             ReadOnly readOnly = f.getAnnotation(ReadOnly.class);
             Column columnAnnotation = f.getAnnotation(Column.class);
-            Unread notRead=f.getAnnotation(Unread.class);
+            Unread notRead = f.getAnnotation(Unread.class);
             String columnNm;
             if (columnAnnotation != null) {
                 columnNm = columnAnnotation.value();
@@ -205,7 +216,7 @@ public abstract class Transfer<E> extends TransferBase {
                 this.colFieldMapper.put(columnNm, fieldName);
                 if (readOnly != null)
                     this.readOnlyColumns.add(columnNm);
-                if(notRead!=null)
+                if (notRead != null)
                     notReads.add(columnNm);
             }
             JdbcType typeAnnotation = f.getAnnotation(JdbcType.class);
@@ -233,7 +244,7 @@ public abstract class Transfer<E> extends TransferBase {
         this.allColumnLabels = columnAs.substring(1);
         try {
             E e = this.eClass.newInstance();
-            this.modifyOneBuilder(e);
+            this.updateOneBuilder(e);
             this.deleteOneBuilder(e);
             this.queryOneBuilder(e);
             this.insertOneBuilder(e);
@@ -251,8 +262,8 @@ public abstract class Transfer<E> extends TransferBase {
         try {
             if (value == null)
                 value = TransferExecutor.parseNullToValue(fields.get(fieldName));
-            Field field=fields.get(fieldName);
-            if (boolean.class.equals(field.getType())||Boolean.class.equals(field.getType())) {
+            Field field = fields.get(fieldName);
+            if (boolean.class.equals(field.getType()) || Boolean.class.equals(field.getType())) {
                 value = Util.toBoolean(value);
             }
             field.set(this.entity, value);
@@ -317,17 +328,17 @@ public abstract class Transfer<E> extends TransferBase {
     /**
      * 根据实体类及对应主键修改数据
      */
-    public void modify(E e) {
+    public void update(E e) {
         List<E> l = new ArrayList<>();
         l.add(e);
-        this.modify(l);
+        this.update(l);
     }
 
-    public void modify(Collection<E> collection) {
-        TransferExecutor.modifyBatch(collection, this);
+    public void update(Collection<E> collection) {
+        TransferExecutor.updateBatch(collection, this);
     }
 
-    List<Object> modifyOneBuilder(E e) {
+    List<Object> updateOneBuilder(E e) {
         List<Object> valueList = new ArrayList<>();
         if (this.primaryKeys.size() != 0) {
             this.entity = e;
@@ -337,7 +348,7 @@ public abstract class Transfer<E> extends TransferBase {
                 if (!this.primaryKeys.contains(col) && !col.equals(autoIncrementCol) && !readOnlyColumns.contains(col)) {
                     String field = this.colFieldMapper.get(col);
                     valueList.add(getFieldValue(field));
-                    if (this.modify_one == null || this.jdbcTypeForModify == null) {
+                    if (this.update_one == null || this.jdbcTypeForUpdate == null) {
                         sets.append(",").append(col).append("=?");
                         jdbcTypeList.add(jdbcTypes.get(field));
                     }
@@ -347,15 +358,16 @@ public abstract class Transfer<E> extends TransferBase {
             for (String col : this.primaryKeys) {
                 String field = this.colFieldMapper.get(col);
                 valueList.add(getFieldValue(field));
-                if (this.modify_one == null || this.jdbcTypeForModify == null) {
+                if (this.update_one == null || this.jdbcTypeForUpdate == null) {
                     whereByPK.append(" And ").append(col).append("=?");
                     jdbcTypeList.add(jdbcTypes.get(field));
                 }
             }
             if (whereByPK.length() != 0) {
-                if (this.modify_one == null || this.jdbcTypeForInsert == null) {
-                    this.modify_one = "UPDATE " + this.tableName + " SET " + sets.toString().substring(1) + "  WHERE " + firstAnd(whereByPK.substring(1));
-                    this.jdbcTypeForModify = jdbcTypeList;
+                if (this.update_one == null || this.jdbcTypeForInsert == null) {
+                    String condition = removeFirstAnd(whereByPK.substring(1));
+                    this.update_one = "UPDATE " + this.tableName + " SET " + sets.toString().substring(1) + "  WHERE " + addFirstAnd(condition);
+                    this.jdbcTypeForUpdate = jdbcTypeList;
                 }
             }
         }
@@ -391,7 +403,8 @@ public abstract class Transfer<E> extends TransferBase {
             }
             if (where.length() != 0) {
                 if (this.delete_one == null || this.primaryKeys == null) {
-                    this.delete_one = "DELETE FROM " + this.tableName + " WHERE " + firstAnd(where.substring(1));
+                    String condition = removeFirstAnd(where.substring(1));
+                    this.delete_one = "DELETE FROM " + this.tableName + " WHERE " + addFirstAnd(condition);
                     this.pkJdbcType = jdbcTypeList;
                 }
             }
@@ -434,7 +447,8 @@ public abstract class Transfer<E> extends TransferBase {
             }
             //select * 的具体字段
             if (this.select_one == null || this.pkJdbcType == null) {
-                this.select_one = "SELECT " + this.allColumnLabels + " FROM " + this.tableName + " WHERE " + firstAnd(where.substring(1));
+                String condition = removeFirstAnd(where.substring(1));
+                this.select_one = "SELECT " + this.allColumnLabels + " FROM " + this.tableName + " WHERE " + addFirstAnd(condition);
                 this.pkJdbcType = types;
             }
         }
@@ -452,7 +466,7 @@ public abstract class Transfer<E> extends TransferBase {
      */
     @NotNull
     protected List<E> query(String condition, Object... supportedSQLArg) {
-        condition = firstAnd(condition);
+        condition = addFirstAnd(condition);
         List<E> list = TransferExecutor.executeQuery(Boolean.FALSE, 0, 0, this.select_all + " WHERE " + condition, this, supportedSQLArg);
         for (E e : list) {
             afterQuery(e);
@@ -468,7 +482,7 @@ public abstract class Transfer<E> extends TransferBase {
      */
     @NotNull
     protected List<E> query(int startIndex, int rows, String condition, Object... supportedSQLArg) {
-        condition = firstAnd(condition);
+        condition = addFirstAnd(condition);
         List<E> list = TransferExecutor.executeQuery(Boolean.TRUE, startIndex, rows, this.select_all + " WHERE " + condition, this, supportedSQLArg);
         for (E e : list) {
             afterQuery(e);
@@ -519,7 +533,7 @@ public abstract class Transfer<E> extends TransferBase {
                 for (String name : map.keySet()) {
                     setFieldValue(name, map.get(name));
                 }
-                this.modify(this.entity);
+                this.update(this.entity);
             }
         }
     }

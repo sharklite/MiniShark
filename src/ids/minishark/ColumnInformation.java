@@ -36,7 +36,7 @@ final class ColumnInformation {
         ResultSet rs = null;
         Statement statement = null;
         ResultSet primaryKeyResultSet = null;
-        String sql = "SELECT * FROM  " + tableName + " WHERE 1=0";
+        String sql = "SELECT * FROM " + tableName + " WHERE 1=0";
         try {
             if (existTable(tableName)) {
                 statement = conn.createStatement();

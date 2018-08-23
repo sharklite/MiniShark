@@ -1,6 +1,5 @@
 package ids.minishark;
 
-
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.util.*;

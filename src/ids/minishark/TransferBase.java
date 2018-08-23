@@ -56,7 +56,7 @@ abstract class TransferBase {
         } else if (object == null) {
             return null;
         }
-        String s = String.valueOf(object);
+        String s = object.toString().trim();
         if (!Util.isNumeric(object))
             throw new NumberFormatException(s + " is NaN.");
         return new BigDecimal(s);
@@ -83,6 +83,7 @@ abstract class TransferBase {
         return (int) this.getLong(preparedSql, supportedSQLArg);
     }
 
+
     protected long getLong(String preparedSql, Object... supportedSQLArg) {
         Number number = this.getBigDecimal(preparedSql, supportedSQLArg);
         return number == null ? 0 : number.longValue();
@@ -100,7 +101,7 @@ abstract class TransferBase {
         } else if (object == null) {
             return null;
         }
-        String s = String.valueOf(object);
+        String s = object.toString();
         if (!Util.isNumeric(object))
             throw new NumberFormatException(s + " is NaN,and " + object + " can't cast to Date.");
         return new Date(new BigDecimal(s).longValue());

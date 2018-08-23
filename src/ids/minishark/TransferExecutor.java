@@ -20,6 +20,7 @@ final class TransferExecutor {
         NOT_NULLS.add(float.class);
         NOT_NULLS.add(double.class);
         NOT_NULLS.add(char.class);
+        NOT_NULLS.add(boolean.class);
     }
 
     private TransferExecutor() {
@@ -62,19 +63,19 @@ final class TransferExecutor {
         return list;
     }
 
-    static <T> void modifyBatch(Collection<T> collection, Transfer<T> transfer) {
+    static <T> void updateBatch(Collection<T> collection, Transfer<T> transfer) {
         if (collection.size() == 0 || transfer.primaryKeys.size() == 0)
             return;
         Connection conn = transfer.getConnection();
         PreparedStatement pst = null;
         try {
-            pst = conn.prepareStatement(transfer.modify_one);
+            pst = conn.prepareStatement(transfer.update_one);
             int i = batch + 1;
             for (T entity : collection) {
                 if (entity == null)
                     continue;
-                List<Object> values = transfer.modifyOneBuilder(entity);
-                TransferExecutor.invokePreparedStatement(pst, values, transfer.jdbcTypeForModify);
+                List<Object> values = transfer.updateOneBuilder(entity);
+                TransferExecutor.invokePreparedStatement(pst, values, transfer.jdbcTypeForUpdate);
                 pst.addBatch();
                 if (i % batch == 0) {
                     pst.executeBatch();
@@ -91,7 +92,7 @@ final class TransferExecutor {
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
-            System.out.println(TransferExecutor.class.getName() + "\n" + transfer.modify_one);
+            System.out.println(TransferExecutor.class.getName() + "\n" + transfer.update_one);
         } finally {
             DataBase.close(pst);
             DataBase.close(conn);
@@ -151,7 +152,7 @@ final class TransferExecutor {
                 conn.commit();
                 if (transfer.autoIncrementCol != null) {//有自增列
                     rsAuto = pst.getGeneratedKeys();
-                    if (rsAuto.next()) {
+                    while (rsAuto.next()) {
                         Object o = rsAuto.getObject(1);//得到插入返回的值
                         Field field = transfer.fields.get(transfer.colFieldMapper.get(transfer.autoIncrementCol));//得到Field
                         if (field != null) {
@@ -242,7 +243,7 @@ final class TransferExecutor {
         }
         field.set(entity, value);
     }
-
+    
     static int executeUpdate(Connection conn, String preparedSql, Object... supportedSQLArg) {
         PreparedStatement pst = null;
         int rows = 0;
@@ -345,8 +346,9 @@ final class TransferExecutor {
         Class c = field.getType();
         if (NOT_NULLS.contains(c)) {
             o = 0;
-        } else if (c.equals(boolean.class)) {
-            o = false;
+            if (c.equals(boolean.class)) {
+                o = false;
+            }
         }
         return o;
     }
