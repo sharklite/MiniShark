@@ -106,12 +106,7 @@ public abstract class Transfer<E> extends TransferBase {
     }
 
     private static String removeFirstAnd(String where) {
-        String res = where.trim();
-        String andFirst = res.toUpperCase().substring(0,4);
-        if ("And ".equalsIgnoreCase(andFirst)) {
-            return res.substring(4);
-        }
-        return where;
+        return where.trim().substring(4);
     }
 
     protected Class<E> getEntityClass() {
@@ -271,12 +266,8 @@ public abstract class Transfer<E> extends TransferBase {
      */
     void setFieldValue(String fieldName, Object value) {
         try {
-            if (value == null)
-                value = TransferExecutor.parseNullToValue(fields.get(fieldName));
             Field field = fields.get(fieldName);
-            if (boolean.class.equals(field.getType()) || Boolean.class.equals(field.getType())) {
-                value = Util.toBoolean(value);
-            }
+            value = TransferExecutor.parseValueDefault(field,value);
             field.set(this.entity, value);
         } catch (IllegalAccessException e) {
             System.out.println(this.eClass.getName() + " set value of " + fieldName + " error.");
@@ -362,6 +353,7 @@ public abstract class Transfer<E> extends TransferBase {
                     if (this.update_one == null || this.jdbcTypeForUpdate == null) {
                         sets.append(",").append(col).append("=?");
                         jdbcTypeList.add(jdbcTypes.get(field));
+//                        System.out.println("1---------------");
                     }
                 }
             }
@@ -372,6 +364,7 @@ public abstract class Transfer<E> extends TransferBase {
                 if (this.update_one == null || this.jdbcTypeForUpdate == null) {
                     whereByPK.append(" And ").append(col).append("=?");
                     jdbcTypeList.add(jdbcTypes.get(field));
+//                    System.out.println("2---------------");
                 }
             }
             if (whereByPK.length() != 0) {
@@ -379,6 +372,7 @@ public abstract class Transfer<E> extends TransferBase {
                     String condition = removeFirstAnd(whereByPK.substring(1));
                     this.update_one = "UPDATE " + this.tableName + " SET " + sets.toString().substring(1) + "  WHERE " + condition;
                     this.jdbcTypeForUpdate = jdbcTypeList;
+//                    System.out.println("3---------------");
                 }
             }
         }

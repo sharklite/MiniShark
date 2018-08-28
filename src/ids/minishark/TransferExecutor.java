@@ -20,7 +20,6 @@ final class TransferExecutor {
         NOT_NULLS.add(float.class);
         NOT_NULLS.add(double.class);
         NOT_NULLS.add(char.class);
-        NOT_NULLS.add(boolean.class);
     }
 
     private TransferExecutor() {
@@ -236,8 +235,7 @@ final class TransferExecutor {
     }
 
     private static void entityFieldValueSet(Field field, Object entity, Object value) throws IllegalAccessException {
-        value = (value == null) ? parseNullToValue(field) : value;
-        field.set(entity, value);
+        field.set(entity, parseValueDefault(field, value));
     }
 
     static int executeUpdate(Connection conn, String preparedSql, Object... supportedSQLArg) {
@@ -336,17 +334,16 @@ final class TransferExecutor {
     }
 
 
-    //根据类型得到基本类型的默认值
-    static Object parseNullToValue(Field field) {
-        Object o = null;
+    //根据类型得到值或者默认值
+    static Object parseValueDefault(Field field, Object value) {
         Class c = field.getType();
-        if (NOT_NULLS.contains(c)) {
-            o = 0;
-            if (c.equals(boolean.class)) {
-                o = false;
-            }
+        if (value == null && NOT_NULLS.contains(c)) {
+            value = 0;
         }
-        return o;
+        if (boolean.class.equals(c) || Boolean.class.equals(c)) {
+            value = Util.toBoolean(value);
+        }
+        return value;
     }
 
 }
