@@ -236,14 +236,10 @@ final class TransferExecutor {
     }
 
     private static void entityFieldValueSet(Field field, Object entity, Object value) throws IllegalAccessException {
-        if (value == null)
-            value = parseNullToValue(field);
-        if (boolean.class.equals(field.getType()) || Boolean.class.equals(field.getType())) {
-            value = Util.toBoolean(value);
-        }
+        value = (value == null) ? parseNullToValue(field) : value;
         field.set(entity, value);
     }
-    
+
     static int executeUpdate(Connection conn, String preparedSql, Object... supportedSQLArg) {
         PreparedStatement pst = null;
         int rows = 0;

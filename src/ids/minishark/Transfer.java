@@ -238,7 +238,12 @@ public abstract class Transfer<E> extends TransferBase {
         for (String columnName : this.colFieldMapper.keySet()) {
             String fieldLabel = this.colFieldMapper.get(columnName);
             if (fieldLabel != null && !notReads.contains(columnName)) {
-                columnAs.append(",").append(columnName).append(" AS ").append(fieldLabel);
+                if(fieldLabel.equals(columnName)){
+                    columnAs.append(",").append(columnName);
+                }else {
+                    columnAs.append(",").append(columnName).append(" AS ").append(fieldLabel);
+                }
+
             }
         }
         this.allColumnLabels = columnAs.substring(1);
@@ -253,6 +258,12 @@ public abstract class Transfer<E> extends TransferBase {
             ex.printStackTrace();
         }
         this.select_all = "SELECT " + this.allColumnLabels + " FROM " + this.tableName;
+
+//        System.out.println(select_one);
+//        System.out.println(update_one);
+//        System.out.println(delete_one);
+//        System.out.println(insert_one);
+//        System.out.println(select_all);
     }
 
     /**
@@ -366,7 +377,7 @@ public abstract class Transfer<E> extends TransferBase {
             if (whereByPK.length() != 0) {
                 if (this.update_one == null || this.jdbcTypeForInsert == null) {
                     String condition = removeFirstAnd(whereByPK.substring(1));
-                    this.update_one = "UPDATE " + this.tableName + " SET " + sets.toString().substring(1) + "  WHERE " + addFirstAnd(condition);
+                    this.update_one = "UPDATE " + this.tableName + " SET " + sets.toString().substring(1) + "  WHERE " + condition;
                     this.jdbcTypeForUpdate = jdbcTypeList;
                 }
             }
@@ -404,7 +415,7 @@ public abstract class Transfer<E> extends TransferBase {
             if (where.length() != 0) {
                 if (this.delete_one == null || this.primaryKeys == null) {
                     String condition = removeFirstAnd(where.substring(1));
-                    this.delete_one = "DELETE FROM " + this.tableName + " WHERE " + addFirstAnd(condition);
+                    this.delete_one = "DELETE FROM " + this.tableName + " WHERE " +condition;
                     this.pkJdbcType = jdbcTypeList;
                 }
             }
@@ -448,7 +459,7 @@ public abstract class Transfer<E> extends TransferBase {
             //select * 的具体字段
             if (this.select_one == null || this.pkJdbcType == null) {
                 String condition = removeFirstAnd(where.substring(1));
-                this.select_one = "SELECT " + this.allColumnLabels + " FROM " + this.tableName + " WHERE " + addFirstAnd(condition);
+                this.select_one = "SELECT " + this.allColumnLabels + " FROM " + this.tableName + " WHERE " + condition;
                 this.pkJdbcType = types;
             }
         }
