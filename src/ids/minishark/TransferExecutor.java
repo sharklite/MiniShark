@@ -191,10 +191,10 @@ final class TransferExecutor {
 
     static <T> List<T> executeQuery(boolean byPage, int startIndex, int rows, String preparedSql, Transfer<T> transfer, Object... supportedSQLArg) {
         List<T> list = new ArrayList<>();
-        Set<String> set = new HashSet<>();
+        Set<String> labels = new HashSet<>();
         PreparedStatement pst = null;
         ResultSet rs = null;
-        Map<String, Field> stringFieldMap = transfer.fields;
+        Map<String, Field> fields = transfer.fields;
         Class<T> beanClass = transfer.eClass;
         Connection conn = transfer.getConnection();
         int count = 0;
@@ -206,16 +206,17 @@ final class TransferExecutor {
             ResultSetMetaData meta = rs.getMetaData();
             for (int i = 1; i <= meta.getColumnCount(); i++) {
                 String label = meta.getColumnLabel(i);
-                set.add(label);
+                labels.add(label);
             }
             if (byPage)
                 rs.absolute(startIndex - 1);
             while (rs.next()) {
                 count++;
                 T entity = beanClass.newInstance();
-                for (String label : set) {
+                for (String label : labels) {
                     Object value = rs.getObject(label);
-                    entityFieldValueSet(stringFieldMap.get(label), entity, value);
+                    Field field=fields.get(label);
+                    field.set(entity, parseValueDefault(field, value));
                 }
                 list.add(entity);
                 if (byPage) {
@@ -234,9 +235,6 @@ final class TransferExecutor {
         return list;
     }
 
-    private static void entityFieldValueSet(Field field, Object entity, Object value) throws IllegalAccessException {
-        field.set(entity, parseValueDefault(field, value));
-    }
 
     static int executeUpdate(Connection conn, String preparedSql, Object... supportedSQLArg) {
         PreparedStatement pst = null;
@@ -325,7 +323,7 @@ final class TransferExecutor {
     }
 
 
-    private static void invokePreparedStatement(PreparedStatement pst, int index, Object object) throws SQLException {
+    static void invokePreparedStatement(PreparedStatement pst, int index, Object object) throws SQLException {
         int code = MappedType.tryFrom(object);
         if (code == MappedType.UNDEFINED)
             pst.setObject(index, object);

@@ -97,12 +97,13 @@ public abstract class Transfer<E> extends TransferBase {
     }
 
     private static String addFirstAnd(String condition) {
-        condition = condition.trim();
-        String s = condition.toUpperCase();
+        if (condition == null)
+            return " ";
+        String s = condition.trim().toUpperCase();
         if (s.startsWith("AND ") || s.startsWith("ORDER ") || s.startsWith("GROUP ")) {
             return " 1=1 " + condition;
         }
-        return ' '+condition;
+        return ' ' + condition;
     }
 
     private static String removeFirstAnd(String where) {
@@ -197,7 +198,7 @@ public abstract class Transfer<E> extends TransferBase {
             //当fieldName与columnName不同时，用注解Column设置正确的columnName以保证正确映射
             ReadOnly readOnly = f.getAnnotation(ReadOnly.class);
             Column columnAnnotation = f.getAnnotation(Column.class);
-            Unread notRead = f.getAnnotation(Unread.class);
+            NotRead notRead = f.getAnnotation(NotRead.class);
             String columnNm;
             if (columnAnnotation != null) {
                 columnNm = columnAnnotation.value();
@@ -233,9 +234,9 @@ public abstract class Transfer<E> extends TransferBase {
         for (String columnName : this.colFieldMapper.keySet()) {
             String fieldLabel = this.colFieldMapper.get(columnName);
             if (fieldLabel != null && !notReads.contains(columnName)) {
-                if(fieldLabel.equals(columnName)){
+                if (fieldLabel.equals(columnName)) {
                     columnAs.append(",").append(columnName);
-                }else {
+                } else {
                     columnAs.append(",").append(columnName).append(" AS ").append(fieldLabel);
                 }
 
@@ -253,7 +254,7 @@ public abstract class Transfer<E> extends TransferBase {
             ex.printStackTrace();
         }
         this.select_all = "SELECT " + this.allColumnLabels + " FROM " + this.tableName;
-
+//
 //        System.out.println(select_one);
 //        System.out.println(update_one);
 //        System.out.println(delete_one);
@@ -267,7 +268,7 @@ public abstract class Transfer<E> extends TransferBase {
     void setFieldValue(String fieldName, Object value) {
         try {
             Field field = fields.get(fieldName);
-            value = TransferExecutor.parseValueDefault(field,value);
+            value = TransferExecutor.parseValueDefault(field, value);
             field.set(this.entity, value);
         } catch (IllegalAccessException e) {
             System.out.println(this.eClass.getName() + " set value of " + fieldName + " error.");
@@ -314,7 +315,7 @@ public abstract class Transfer<E> extends TransferBase {
                 String field = this.colFieldMapper.get(col);
                 valueList.add(getFieldValue(field));
                 if (this.insert_one == null || this.jdbcTypeForInsert == null) {
-                    cols.append(",").append(col);
+                    cols.append(',').append(col);
                     values.append(",?");
                     jdbcTypeList.add(jdbcTypes.get(field));
                 }
@@ -351,9 +352,8 @@ public abstract class Transfer<E> extends TransferBase {
                     String field = this.colFieldMapper.get(col);
                     valueList.add(getFieldValue(field));
                     if (this.update_one == null || this.jdbcTypeForUpdate == null) {
-                        sets.append(",").append(col).append("=?");
+                        sets.append(',').append(col).append("=?");
                         jdbcTypeList.add(jdbcTypes.get(field));
-//                        System.out.println("1---------------");
                     }
                 }
             }
@@ -362,17 +362,15 @@ public abstract class Transfer<E> extends TransferBase {
                 String field = this.colFieldMapper.get(col);
                 valueList.add(getFieldValue(field));
                 if (this.update_one == null || this.jdbcTypeForUpdate == null) {
-                    whereByPK.append(" And ").append(col).append("=?");
+                    whereByPK.append(" AND ").append(col).append("=?");
                     jdbcTypeList.add(jdbcTypes.get(field));
-//                    System.out.println("2---------------");
                 }
             }
             if (whereByPK.length() != 0) {
                 if (this.update_one == null || this.jdbcTypeForInsert == null) {
-                    String condition = removeFirstAnd(whereByPK.substring(1));
-                    this.update_one = "UPDATE " + this.tableName + " SET " + sets.toString().substring(1) + "  WHERE " + condition;
+                    String condition = removeFirstAnd(whereByPK.toString());
+                    this.update_one = "UPDATE " + this.tableName + " SET " + sets.toString().substring(1) + " WHERE " + condition;
                     this.jdbcTypeForUpdate = jdbcTypeList;
-//                    System.out.println("3---------------");
                 }
             }
         }
@@ -402,14 +400,14 @@ public abstract class Transfer<E> extends TransferBase {
                 String field = this.colFieldMapper.get(pk);
                 valuesList.add(getFieldValue(field));
                 if (this.delete_one == null || this.pkJdbcType == null) {
-                    where.append(" And ").append(pk).append("=?");
+                    where.append(" AND ").append(pk).append("=?");
                     jdbcTypeList.add(jdbcTypes.get(field));
                 }
             }
             if (where.length() != 0) {
                 if (this.delete_one == null || this.primaryKeys == null) {
-                    String condition = removeFirstAnd(where.substring(1));
-                    this.delete_one = "DELETE FROM " + this.tableName + " WHERE " +condition;
+                    String condition = removeFirstAnd(where.toString());
+                    this.delete_one = "DELETE FROM " + this.tableName + " WHERE " + condition;
                     this.pkJdbcType = jdbcTypeList;
                 }
             }
@@ -446,13 +444,13 @@ public abstract class Transfer<E> extends TransferBase {
                 String field = this.colFieldMapper.get(pk);
                 values.add(getFieldValue(field));
                 if (this.select_one == null || this.pkJdbcType == null) {
-                    where.append(" And ").append(pk).append("=?");
+                    where.append(" AND ").append(pk).append("=?");
                     types.add(jdbcTypes.get(field));
                 }
             }
             //select * 的具体字段
             if (this.select_one == null || this.pkJdbcType == null) {
-                String condition = removeFirstAnd(where.substring(1));
+                String condition = removeFirstAnd(where.toString());
                 this.select_one = "SELECT " + this.allColumnLabels + " FROM " + this.tableName + " WHERE " + condition;
                 this.pkJdbcType = types;
             }
@@ -470,7 +468,7 @@ public abstract class Transfer<E> extends TransferBase {
      * @param supportedSQLArg 可变长参数，与condition中的 ? 对应
      */
     @NotNull
-    protected List<E> query(String condition, Object... supportedSQLArg) {
+    final public List<E> query(String condition, Object... supportedSQLArg) {
         condition = addFirstAnd(condition);
         List<E> list = TransferExecutor.executeQuery(Boolean.FALSE, 0, 0, this.select_all + " WHERE " + condition, this, supportedSQLArg);
         for (E e : list) {
@@ -486,12 +484,25 @@ public abstract class Transfer<E> extends TransferBase {
      * @param supportedSQLArg 可变长参数，与condition中的 ? 对应
      */
     @NotNull
-    protected List<E> query(int startIndex, int rows, String condition, Object... supportedSQLArg) {
+    final public List<E> query(int startIndex, int rows, String condition, Object... supportedSQLArg) {
         condition = addFirstAnd(condition);
         List<E> list = TransferExecutor.executeQuery(Boolean.TRUE, startIndex, rows, this.select_all + " WHERE " + condition, this, supportedSQLArg);
         for (E e : list) {
             afterQuery(e);
         }
+        return list;
+    }
+
+    @NotNull
+    public List<E> queryByPage(Page page) {
+        if (page.getSqlSelect() == null) {
+            page.setSqlSelect(this.select_all);
+        }
+        List<E> list = TransferExecutor.executeQuery(Boolean.TRUE, page.getStartIndex(), page.getPageRows(), page.getSqlSelect(), this, page.getSqlArgs());
+        for (E e : list) {
+            afterQuery(e);
+        }
+        page.doPageQuery(this.getConnection());
         return list;
     }
 
