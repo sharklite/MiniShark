@@ -46,7 +46,7 @@ public class Page {
         return totalRows;
     }
 
-    int getStartIndex() {
+    public int getStartIndex() {
         return startIndex;
     }
 

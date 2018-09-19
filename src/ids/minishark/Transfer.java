@@ -495,9 +495,8 @@ public abstract class Transfer<E> extends TransferBase {
 
     @NotNull
     public List<E> queryByPage(Page page) {
-        if (page.getSqlSelect() == null) {
+        if (page.getSqlSelect() == null)
             page.setSqlSelect(this.select_all);
-        }
         List<E> list = TransferExecutor.executeQuery(Boolean.TRUE, page.getStartIndex(), page.getPageRows(), page.getSqlSelect(), this, page.getSqlArgs());
         for (E e : list) {
             afterQuery(e);

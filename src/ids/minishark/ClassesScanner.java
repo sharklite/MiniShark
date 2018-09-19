@@ -17,10 +17,10 @@ class ClassesScanner {
 
     static Set<Class<?>> getClasses(String packageName) {
         Set<Class<?>> classes = new HashSet<>();
-        packageName = packageName.trim();
-        String classNames = packageName.trim();
+        String singleClassName = packageName.trim();
         // 获取包的名字 并进行替换
-        String packageDirName = packageName.replaceAll("\\.", "/").replaceAll("/\\*", "");
+        String packageDirName = packageName.replaceAll("\\.", "/").replaceAll("/\\*", "").trim();
+        packageName = packageDirName.replaceAll("/", "\\.");
         Enumeration<URL> dirs;
         try {
             dirs = Thread.currentThread().getContextClassLoader().getResources(packageDirName);
@@ -87,9 +87,9 @@ class ClassesScanner {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if (classes.isEmpty()) {//packageName就是一个完整的类时
+        if (classes.isEmpty() && !singleClassName.contains(".*")) {//packageName就是一个完整的类时
             try {
-                classes.add(Thread.currentThread().getContextClassLoader().loadClass(classNames));
+                classes.add(Thread.currentThread().getContextClassLoader().loadClass(singleClassName));
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
