@@ -39,48 +39,43 @@ class ClassesScanner {
                     // 如果是jar包文件 jar类型的扫描
                     // 定义一个JarFile
                     JarFile jar;
-                    try {
-                        // 获取jar
-                        jar = ((JarURLConnection) url.openConnection()).getJarFile();
-                        // 从此jar包 得到一个枚举类
-                        Enumeration<JarEntry> entries = jar.entries();
-                        // 同样的进行循环迭代
-                        while (entries.hasMoreElements()) {
-                            // 获取jar里的一个实体 可以是目录 和一些jar包里的其他文件 如META-INF等文件
-                            JarEntry entry = entries.nextElement();
-                            String name = entry.getName();
-                            // 如果是以/开头的
-                            if (name.charAt(0) == '/') {
-                                name = name.substring(1);
+                    // 获取jar
+                    jar = ((JarURLConnection) url.openConnection()).getJarFile();
+                    // 从此jar包 得到一个枚举类
+                    Enumeration<JarEntry> entries = jar.entries();
+                    // 同样的进行循环迭代
+                    while (entries.hasMoreElements()) {
+                        // 获取jar里的一个实体 可以是目录 和一些jar包里的其他文件 如META-INF等文件
+                        JarEntry entry = entries.nextElement();
+                        String name = entry.getName();
+                        // 如果是以/开头的
+                        if (name.charAt(0) == '/') {
+                            name = name.substring(1);
+                        }
+                        // 如果前半部分和定义的包名相同
+                        if (name.startsWith(packageDirName)) {
+                            int idx = name.lastIndexOf('/');
+                            // 如果以"/"结尾 是一个包
+                            if (idx != -1) {
+                                // 获取包名 把"/"替换成"."
+                                packageName = name.substring(0, idx).replace('/', '.');
                             }
-                            // 如果前半部分和定义的包名相同
-                            if (name.startsWith(packageDirName)) {
-                                int idx = name.lastIndexOf('/');
-                                // 如果以"/"结尾 是一个包
-                                if (idx != -1) {
-                                    // 获取包名 把"/"替换成"."
-                                    packageName = name.substring(0, idx).replace('/', '.');
-                                }
-                                // 如果可以迭代下去 并且是一个包
-                                if ((idx != -1)) {
-                                    // 如果是一个.class文件 而且不是目录
-                                    if (name.endsWith(".class") && !entry.isDirectory()) {
-                                        // 去掉后面的".class" 获取真正的类名
-                                        String className = name.substring(packageName.length() + 1, name.length() - 6);
-                                        try {
-                                            // 添加到classes
-                                            classes.add(Thread.currentThread().getContextClassLoader().loadClass(packageName + '.' + className));
-                                        } catch (ClassNotFoundException e) {
-                                            // error("添加用户自定义视图类错误 找不到此类的.class文件");
-                                            e.printStackTrace();
-                                        }
+                            // 如果可以迭代下去 并且是一个包
+                            if ((idx != -1)) {
+                                // 如果是一个.class文件 而且不是目录
+                                if (name.endsWith(".class") && !entry.isDirectory()) {
+                                    // 去掉后面的".class" 获取真正的类名
+                                    String className = name.substring(packageName.length() + 1, name.length() - 6);
+                                    try {
+                                        // 添加到classes
+                                        classes.add(Thread.currentThread().getContextClassLoader().loadClass(packageName + '.' + className));
+                                    } catch (ClassNotFoundException e) {
+                                        // error("添加用户自定义视图类错误 找不到此类的.class文件");
+                                        e.printStackTrace();
                                     }
                                 }
                             }
                         }
-                    } catch (IOException e) {
-                        // ("在扫描用户定义视图时从jar包获取文件出错");
-                        e.printStackTrace();
                     }
                 }
             }
@@ -88,11 +83,14 @@ class ClassesScanner {
             e.printStackTrace();
         }
         if (classes.isEmpty() && !singleClassName.contains(".*")) {//packageName就是一个完整的类时
+            Class<?> c = null;
             try {
-                classes.add(Thread.currentThread().getContextClassLoader().loadClass(singleClassName));
+                c = Thread.currentThread().getContextClassLoader().loadClass(singleClassName);
             } catch (ClassNotFoundException e) {
-                e.printStackTrace();
+                //ignore
             }
+            if (c != null)
+                classes.add(c);
         }
         return classes;
     }
