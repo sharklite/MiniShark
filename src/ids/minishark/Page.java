@@ -7,12 +7,17 @@ import java.sql.ResultSet;
 import static ids.minishark.TransferExecutor.invokePreparedStatement;
 
 public class Page {
+    boolean defaultSql = true;
     private int startIndex = 1;
     private int pageRows = 15;
     private int currentPage = 1;
     private Object[] sqlArgs;
     private String sqlSelect;
     private int totalRows = -1;
+
+    boolean isDefaultSql() {
+        return defaultSql;
+    }
 
     Object[] getSqlArgs() {
         if (sqlArgs == null)
@@ -39,6 +44,7 @@ public class Page {
 
     public void setSqlSelect(String sqlSelect) {
         this.sqlSelect = sqlSelect;
+        defaultSql = false;
     }
 
 
