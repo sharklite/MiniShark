@@ -12,11 +12,9 @@ abstract class TransferBase {
 
     DataSource dataSource;
 
-    public DataSource getDataSource() {
+    final public DataSource getDataSource() {
         return dataSource;
     }
-
-    abstract void setDataSource(DataSource dataSource);
 
     Connection getConnection() {
         Connection c = null;

@@ -114,8 +114,7 @@ public abstract class Transfer<E> extends TransferBase {
         return this.eClass;
     }
 
-    @Override
-    protected void setDataSource(DataSource dataSource) {
+    final public void setDataSource(DataSource dataSource) {
         DataBase.CONFIG_DATA_SOURCE.put(this.eClass, dataSource);
         this.init(this.eClass, this.tableName);
     }
@@ -153,10 +152,12 @@ public abstract class Transfer<E> extends TransferBase {
         this.eClass = eClass;
         //配置对应的数据源
         Class<?> key = this.getClass();
-        if (DataBase.CONFIG_DATA_SOURCE.containsKey(key)) {//是否通过包名配置了数据源
-            this.dataSource = DataBase.CONFIG_DATA_SOURCE.get(key);
-        } else {
-            this.dataSource = DataBase.defaultDataSource;
+        if (this.dataSource == null) {
+            if (DataBase.CONFIG_DATA_SOURCE.containsKey(key)) {//是否通过包名配置了数据源
+                this.dataSource = DataBase.CONFIG_DATA_SOURCE.get(key);
+            } else {
+                this.dataSource = DataBase.defaultDataSource;
+            }
         }
         if (this.dataSource == null) {
             if (DataBase.CONFIG_DATA_SOURCE.containsKey(key)) {
