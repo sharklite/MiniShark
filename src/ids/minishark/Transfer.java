@@ -158,14 +158,10 @@ public abstract class Transfer<E> extends TransferBase {
             } else {
                 this.dataSource = DataBase.defaultDataSource;
             }
-        }
-        if (this.dataSource == null) {
-            if (DataBase.CONFIG_DATA_SOURCE.containsKey(key)) {
+            if (this.dataSource == null) {
                 System.err.println("error:there's no dataSource in Transfer<" + this.eClass.getName() + ">");
-            } else {
-                System.err.println("error:there's no default dataSource in Transfer");
+                return;
             }
-            return;
         }
         notReads = new HashSet<>();
         //通过构造器或注解传入对应的数据库表，以注解传入的表为准
