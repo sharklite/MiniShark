@@ -26,10 +26,14 @@ final class TransferExecutor {
 
     }
 
+    private static boolean executable(Collection collection, Transfer transfer) {
+        return collection != null && collection.size() != 0 && transfer.primaryKeys.size() != 0;
+    }
+
     @NotNull
     static <T> List<T> queryBatch(Collection<T> collection, Transfer<T> transfer) {
         List<T> list = new ArrayList<>();
-        if (collection==null||collection.size() == 0 || transfer.primaryKeys.size() == 0)
+        if (!executable(collection, transfer))
             return list;
         Connection conn = transfer.getConnection();
         try {
@@ -63,7 +67,7 @@ final class TransferExecutor {
     }
 
     static <T> void updateBatch(Collection<T> collection, Transfer<T> transfer) {
-        if (collection==null||collection.size() == 0 || transfer.primaryKeys.size() == 0)
+        if (!executable(collection, transfer))
             return;
         Connection conn = transfer.getConnection();
         PreparedStatement pst = null;
@@ -99,7 +103,7 @@ final class TransferExecutor {
     }
 
     static <T> void deleteBatch(Collection<T> collection, Transfer<T> transfer) {
-        if (collection==null||collection.size() == 0 || transfer.primaryKeys.size() == 0)
+        if (!executable(collection, transfer))
             return;
         Connection conn = transfer.getConnection();
         PreparedStatement pst = null;
@@ -135,7 +139,7 @@ final class TransferExecutor {
     }
 
     static <T> void insertBatch(Collection<T> collection, Transfer<T> transfer) {
-        if (collection==null||collection.size() == 0 || transfer.primaryKeys.size() == 0)
+        if (collection == null || collection.size() == 0)
             return;
         Connection conn = transfer.getConnection();
         PreparedStatement pst = null;
@@ -215,7 +219,7 @@ final class TransferExecutor {
                 T entity = beanClass.newInstance();
                 for (String label : labels) {
                     Object value = rs.getObject(label);
-                    Field field=fields.get(label);
+                    Field field = fields.get(label);
                     field.set(entity, parseValueDefault(field, value));
                 }
                 list.add(entity);
