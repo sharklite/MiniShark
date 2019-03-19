@@ -114,6 +114,10 @@ public abstract class Transfer<E> extends TransferBase {
         return this.eClass;
     }
 
+    protected E getEntity() {
+        return this.entity;
+    }
+
     final public void setDataSource(DataSource dataSource) {
         DataBase.CONFIG_DATA_SOURCE.put(this.eClass, dataSource);
         this.init(this.eClass, this.tableName);
@@ -234,7 +238,7 @@ public abstract class Transfer<E> extends TransferBase {
                 if (fieldLabel.equals(columnName)) {
                     columnAs.append(",").append(columnName);
                 } else {
-                    columnAs.append(",").append(columnName).append(" AS ").append(fieldLabel);
+                    columnAs.append(",").append(columnName).append(" AS ").append("'").append(fieldLabel).append("'");
                 }
 
             }

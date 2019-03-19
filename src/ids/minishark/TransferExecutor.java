@@ -29,7 +29,7 @@ final class TransferExecutor {
     @NotNull
     static <T> List<T> queryBatch(Collection<T> collection, Transfer<T> transfer) {
         List<T> list = new ArrayList<>();
-        if (collection.size() == 0 || transfer.primaryKeys.size() == 0)
+        if (collection==null||collection.size() == 0 || transfer.primaryKeys.size() == 0)
             return list;
         Connection conn = transfer.getConnection();
         try {
@@ -63,7 +63,7 @@ final class TransferExecutor {
     }
 
     static <T> void updateBatch(Collection<T> collection, Transfer<T> transfer) {
-        if (collection.size() == 0 || transfer.primaryKeys.size() == 0)
+        if (collection==null||collection.size() == 0 || transfer.primaryKeys.size() == 0)
             return;
         Connection conn = transfer.getConnection();
         PreparedStatement pst = null;
@@ -99,7 +99,7 @@ final class TransferExecutor {
     }
 
     static <T> void deleteBatch(Collection<T> collection, Transfer<T> transfer) {
-        if (collection.size() == 0 || transfer.primaryKeys.size() == 0)
+        if (collection==null||collection.size() == 0 || transfer.primaryKeys.size() == 0)
             return;
         Connection conn = transfer.getConnection();
         PreparedStatement pst = null;
@@ -135,7 +135,7 @@ final class TransferExecutor {
     }
 
     static <T> void insertBatch(Collection<T> collection, Transfer<T> transfer) {
-        if (collection.size() == 0 || transfer.primaryKeys.size() == 0)
+        if (collection==null||collection.size() == 0 || transfer.primaryKeys.size() == 0)
             return;
         Connection conn = transfer.getConnection();
         PreparedStatement pst = null;

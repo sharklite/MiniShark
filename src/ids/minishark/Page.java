@@ -7,7 +7,7 @@ import java.sql.ResultSet;
 import static ids.minishark.TransferExecutor.invokePreparedStatement;
 
 public class Page {
-    boolean defaultSql = true;
+    private boolean defaultSql = true;
     private int startIndex = 1;
     private int pageRows = 15;
     private int currentPage = 1;
