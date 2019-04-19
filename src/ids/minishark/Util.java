@@ -1,7 +1,12 @@
 package ids.minishark;
 
 
+import java.util.regex.Pattern;
+
 final class Util {
+
+    private static final Pattern NUMERIC_1 = Pattern.compile("^[-+]?(([0-9]+)([.]([0-9]+))?|([0-9]+)[.]|([.]([0-9]+))?)$");
+    private static final Pattern NUMERIC_2 = Pattern.compile("^([-+]?\\d+.?\\d*)[Ee]([-+]?\\d+)$");
 
     private Util() {
     }
@@ -12,7 +17,7 @@ final class Util {
         if (!f && o != null) {
             String s = o.toString().trim();
             f = !s.isEmpty() &&
-                    (s.matches("^[-+]?(([0-9]+)([.]([0-9]+))?|([0-9]+)[.]|([.]([0-9]+))?)$") || s.matches("^([-+]?\\d+.?\\d*)[Ee]([-+]?\\d+)$"));
+                    (NUMERIC_1.matcher(s).matches() || NUMERIC_2.matcher(s).matches());
         }
         return f;
     }

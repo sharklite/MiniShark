@@ -26,14 +26,14 @@ final class TransferExecutor {
 
     }
 
-    private static boolean executable(Collection collection, Transfer transfer) {
-        return collection != null && collection.size() != 0 && transfer.primaryKeys.size() != 0;
+    private static boolean unusable(Collection collection, Transfer transfer) {
+        return collection == null || collection.size() == 0 || transfer.primaryKeys.size() == 0;
     }
 
     @NotNull
     static <T> List<T> queryBatch(Collection<T> collection, Transfer<T> transfer) {
         List<T> list = new ArrayList<>();
-        if (!executable(collection, transfer))
+        if (unusable(collection, transfer))
             return list;
         Connection conn = transfer.getConnection();
         try {
@@ -67,7 +67,7 @@ final class TransferExecutor {
     }
 
     static <T> void updateBatch(Collection<T> collection, Transfer<T> transfer) {
-        if (!executable(collection, transfer))
+        if (unusable(collection, transfer))
             return;
         Connection conn = transfer.getConnection();
         PreparedStatement pst = null;
@@ -103,7 +103,7 @@ final class TransferExecutor {
     }
 
     static <T> void deleteBatch(Collection<T> collection, Transfer<T> transfer) {
-        if (!executable(collection, transfer))
+        if (unusable(collection, transfer))
             return;
         Connection conn = transfer.getConnection();
         PreparedStatement pst = null;

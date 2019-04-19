@@ -167,6 +167,9 @@ public abstract class Transfer<E> extends TransferBase {
                 return;
             }
         }
+        //Object for common query
+        if (this.eClass == Object.class)
+            return;
         notReads = new HashSet<>();
         //通过构造器或注解传入对应的数据库表，以注解传入的表为准
         this.tableName = table;
@@ -255,12 +258,7 @@ public abstract class Transfer<E> extends TransferBase {
             ex.printStackTrace();
         }
         this.select_all = "SELECT " + this.allColumnLabels + " FROM " + this.tableName;
-//
-//        System.out.println(select_one);
-//        System.out.println(update_one);
-//        System.out.println(delete_one);
-//        System.out.println(insert_one);
-//        System.out.println(select_all);
+
     }
 
     /**

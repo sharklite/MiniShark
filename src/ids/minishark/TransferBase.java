@@ -1,12 +1,12 @@
 package ids.minishark;
 
 import com.sun.istack.internal.NotNull;
-
 import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.util.Date;
 import java.util.List;
+
 
 abstract class TransferBase {
 
