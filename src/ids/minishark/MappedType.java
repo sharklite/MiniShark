@@ -51,7 +51,9 @@ final class MappedType {
             type = Types.TIME;
         } else if (object instanceof java.sql.Date) {
             type = Types.DATE;
-        } else if (object instanceof byte[]) {
+        } else if (object instanceof java.util.Date) {
+            type = Types.TIMESTAMP;
+        }else if (object instanceof byte[]) {
             type = Types.VARBINARY;
         } else if (object instanceof Byte[]) {
             type = Types.VARBINARY;

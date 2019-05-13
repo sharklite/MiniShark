@@ -167,7 +167,7 @@ public abstract class Transfer<E> extends TransferBase {
                 return;
             }
         }
-        //Object for common query
+        //Object.class for common query
         if (this.eClass == Object.class)
             return;
         notReads = new HashSet<>();
