@@ -1,9 +1,8 @@
-package ids.minishark.annotation;
+package ids.sharklite.transfer.annotation;
 
 import java.lang.annotation.*;
 
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface JdbcType {
-    int value();
+public @interface ReadOnly {
 }

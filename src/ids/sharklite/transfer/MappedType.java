@@ -1,27 +1,11 @@
-package ids.minishark;
+package ids.sharklite.transfer;
 
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.sql.Types;
-import java.util.HashSet;
-import java.util.Set;
 
 final class MappedType {
 
     static final int UNDEFINED = Integer.MIN_VALUE;
-    private static final Set<Integer> JDBC_TYPE = new HashSet<>();
-
-    static {
-        //得到所有jdbc类型
-        Field[] fields = Types.class.getFields();
-        for (Field field : fields) {
-            try {
-                JDBC_TYPE.add(field.getInt(Types.class));
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
     private MappedType() {
     }
@@ -53,7 +37,7 @@ final class MappedType {
             type = Types.DATE;
         } else if (object instanceof java.util.Date) {
             type = Types.TIMESTAMP;
-        }else if (object instanceof byte[]) {
+        } else if (object instanceof byte[]) {
             type = Types.VARBINARY;
         } else if (object instanceof Byte[]) {
             type = Types.VARBINARY;
@@ -74,12 +58,6 @@ final class MappedType {
         } else {
             type = UNDEFINED;
         }
-        return type;
-    }
-
-    static int jdbcTypeOf(int type) {
-        if (!JDBC_TYPE.contains(type))
-            type = UNDEFINED;
         return type;
     }
 

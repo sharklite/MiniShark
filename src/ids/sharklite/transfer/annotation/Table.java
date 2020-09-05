@@ -1,4 +1,4 @@
-package ids.minishark.annotation;
+package ids.sharklite.transfer.annotation;
 
 import java.lang.annotation.*;
 

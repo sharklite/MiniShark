@@ -1,4 +1,4 @@
-package ids.minishark;
+package ids.sharklite.transfer;
 
 import java.sql.*;
 import java.util.HashMap;
@@ -9,34 +9,30 @@ import java.util.Set;
 final class ColumnInformation {
 
     Set<String> readOnlyColumns;//只读列的列名
-    Map<String, Integer> columnType;//列名及对应的jdbc类型
-    Map<String, String> columnClass;//列名及对应的java类型
+    Map<String, JDBCType> columnType;//列名及对应的jdbc类型
 
     String autoIncrement;//自增列的列名
-    Set<String> primaryKeys;//主键列名
+    Set<String> conditions;//主键(条件)列名
 
-    private Connection conn;
+    private final Transfer<?> transfer;
+    private final Connection conn;
 
-    /**
-     * @param tableName the table name in database
-     * @param eClass    the table mapped class
-     */
-    ColumnInformation(String tableName, Class eClass, Connection connection) {
-        this.conn = connection;
-        init(tableName, eClass);
+    ColumnInformation(Transfer<?> transfer) {
+        this.transfer = transfer;
+        this.conn = transfer.getConnection();
+        init(transfer.getTableName());
     }
 
     //得到表及相关列的信息
-    private void init(String tableName, Class eClass) {
+    private void init(String tableName) {
         this.columnType = new HashMap<>();
-        this.columnClass = new HashMap<>();
-        this.primaryKeys = new HashSet<>();
+        this.conditions = new HashSet<>();
         this.readOnlyColumns = new HashSet<>();
 
         ResultSet rs = null;
         Statement statement = null;
         ResultSet primaryKeyResultSet = null;
-        String sql = "SELECT * FROM " + tableName + " WHERE 1=0";
+        String sql = "SELECT * FROM " + this.transfer.getLeftWrap() + tableName + this.transfer.getRightWrap() + " WHERE 1=0";
         try {
             if (existTable(tableName)) {
                 statement = conn.createStatement();
@@ -47,30 +43,26 @@ final class ColumnInformation {
                     if (meta.isReadOnly(i))
                         this.readOnlyColumns.add(col);
                     int jdbcType = meta.getColumnType(i);
-                    String className = meta.getColumnClassName(i);
-                    columnType.put(col, jdbcType);
-                    columnClass.put(col, className);
+                    columnType.put(col, JDBCType.valueOf(jdbcType));
                     if (autoIncrement == null && meta.isAutoIncrement(i))
                         autoIncrement = col;
                 }
                 primaryKeyResultSet = conn.getMetaData().getPrimaryKeys(null, null, tableName);
                 while (primaryKeyResultSet.next()) {
                     String pk = primaryKeyResultSet.getString(4);
-                    this.primaryKeys.add(pk);
+                    this.conditions.add(pk);
                 }
             } else {
-                if (eClass != null)
-                    System.out.println(eClass + " does not refer to database table.");
                 throw new Exception("this table - " + tableName + " does not exist in database");
             }
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(sql);
         } finally {
-            DataBase.close(primaryKeyResultSet);
-            DataBase.close(rs);
-            DataBase.close(statement);
-            DataBase.close(conn);
+            Util.close(primaryKeyResultSet);
+            Util.close(rs);
+            Util.close(statement);
+            Util.close(conn);
         }
     }
 
@@ -85,7 +77,7 @@ final class ColumnInformation {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            DataBase.close(rsTables);
+            Util.close(rsTables);
         }
         return flag;
     }

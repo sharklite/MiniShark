@@ -1,45 +1,45 @@
-package  test;
+package test;
 
-import ids.minishark.annotation.Column;
-import ids.minishark.annotation.JdbcType;
-import ids.minishark.annotation.ReadOnly;
-import ids.minishark.annotation.Table;
+import ids.sharklite.transfer.annotation.Column;
+import ids.sharklite.transfer.annotation.DataType;
+import ids.sharklite.transfer.annotation.ReadOnly;
+import ids.sharklite.transfer.annotation.Table;
 import java.sql.*;
 
-@Table("Person")
+//@Table("Person")
 public class Person{
 
     public Person(){
     }
 
     @Column("dat")
-    @JdbcType(Types.BINARY)
+    @DataType(JDBCType.BINARY)
     private byte[] dat;
 
     @ReadOnly
     @Column("id")
-    @JdbcType(Types.INTEGER)
+    @DataType(JDBCType.INTEGER)
     private int id;
 
     @ReadOnly
     @Column("times")
-    @JdbcType(Types.BINARY)
+    @DataType(JDBCType.BINARY)
     private byte[] times;
 
     @Column("age")
-    @JdbcType(Types.INTEGER)
+    @DataType(JDBCType.INTEGER)
     private int age;
 
     @Column("name")
-    @JdbcType(Types.VARCHAR)
+    @DataType(JDBCType.VARCHAR)
     private String name;
 
     @Column("gender")
-    @JdbcType(Types.BIT)
+    @DataType(JDBCType.BIT)
     private boolean gender;
 
     @Column("birthDay")
-    @JdbcType(Types.TIMESTAMP)
+    @DataType(JDBCType.TIMESTAMP)
     private Timestamp birthDay;
 
 

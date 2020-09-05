@@ -28,10 +28,10 @@ public class DBS {
             USER=prop.getProperty("user");
             PWD=prop.getProperty("pwd");
             initialSize= Integer.parseInt(prop.getProperty("initialSize"));
-            minIdle= Integer.valueOf(prop.getProperty("minIdle"));
-            maxIdle= Integer.valueOf(prop.getProperty("maxIdle"));
-            maxActive= Integer.valueOf(prop.getProperty("maxActive"));
-            maxWait= Integer.valueOf(prop.getProperty("maxWait"));
+            minIdle= Integer.parseInt(prop.getProperty("minIdle"));
+            maxIdle= Integer.parseInt(prop.getProperty("maxIdle"));
+            maxActive= Integer.parseInt(prop.getProperty("maxActive"));
+            maxWait= Integer.parseInt(prop.getProperty("maxWait"));
 
             bds=new BasicDataSource();
             bds.setDriverClassName(DRIVER);
@@ -48,6 +48,7 @@ public class DBS {
             e.printStackTrace();
         }
     }
+
     public static BasicDataSource getBasicDataSource(){
         return bds;
     }

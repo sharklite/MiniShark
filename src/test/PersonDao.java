@@ -1,48 +1,46 @@
 package test;
 
-import ids.minishark.Transfer;
-import java.sql.Timestamp;
+
+import ids.sharklite.transfer.Transfer;
+
+import javax.sql.DataSource;
+import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.List;
 
 public class PersonDao extends Transfer<Person> {
 
-    public PersonDao(){
-        super("Person");//在使用的注解的情况下可不用
+
+    public PersonDao(DataSource dataSource) {
+        super(dataSource);
     }
 
-    public Person findById(int id){
+    public Person findById(int id) throws SQLException {
         Person person=new Person();
         person.setId(id);
-        return this.query(person);
+        this.update(person);
+        return this.select(person);
     }
 
-    public void deleteById(int id){
+    public void deleteById(int id) throws SQLException {
         Person person=new Person();
         person.setId(id);
         this.delete(person);
     }
-    public void insert(Person person){
+    public void insert(Person person) throws SQLException {
 //        person.setId(this.tryInt("select SEQ.nextval from dual"));// for oracle
         super.insert(person);
     }
 
-    @Override
-    protected void afterQuery(Person person){
-//        person.setName(person.getName()==null?"***":person.getName()+" ---");
-        List<Integer> ids=this.firstColumnValues("select id from person");
-        System.out.println("------------");
-        for(Integer id:ids){
-            System.out.println("------------"+id);
-        }
-    }
+
 
     public List<Person> queryOld() {
         Calendar calendar=Calendar.getInstance();
         calendar.set(Calendar.YEAR,1986);
         calendar.set(Calendar.MONTH,Calendar.JANUARY);
         calendar.set(Calendar.DAY_OF_MONTH,1);
-        return this.query(" birthDay <=? ",new Timestamp(calendar.getTimeInMillis()));
+        return null;
+//        return this.query(" birthDay <=? ",new Timestamp(calendar.getTimeInMillis()));
     }
 
 
