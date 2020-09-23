@@ -59,7 +59,7 @@ abstract class BaseTransfer<E> {
     Set<String> readOnlyColumns;
     /**
      * E 的实体类
-     * 始终为 private
+     * 要包含无参构造，以便实例化
      */
     E entity;
     /**

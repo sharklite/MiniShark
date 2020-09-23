@@ -6,11 +6,11 @@ import java.sql.*;
 import java.util.*;
 
 
-final class TransferExecutor {
+final class DBExecutor {
 
     private static final int BATCH = 128;
 
-    private TransferExecutor() {
+    private DBExecutor() {
 
     }
 
@@ -23,12 +23,11 @@ final class TransferExecutor {
         if (unusable(collection, transfer))
             return list;
         Connection conn = transfer.getConnection();
-        try {
+        try (PreparedStatement pst = conn.prepareStatement(transfer.select_one)) {
             for (T entity : collection) {
                 if (entity == null)
                     continue;
-                PreparedStatement pst = conn.prepareStatement(transfer.select_one);
-                TransferExecutor.addPreparedStatementParameters(pst, transfer.selectValues(entity));
+                DBExecutor.addPreparedStatementParameters(pst, transfer.selectValues(entity));
                 ResultSet rs = pst.executeQuery();
                 while (rs.next()) {
                     list.add(entity);
@@ -41,7 +40,6 @@ final class TransferExecutor {
                     }
                 }
                 Util.close(rs);
-                Util.close(pst);
             }
         } finally {
             Util.close(conn);
@@ -53,14 +51,12 @@ final class TransferExecutor {
         if (unusable(collection, transfer))
             return;
         Connection conn = transfer.getConnection();
-        PreparedStatement pst = null;
-        try {
-            pst = conn.prepareStatement(transfer.update_one);
+        try (PreparedStatement pst = conn.prepareStatement(transfer.update_one);) {
             int i = 1;
             for (T entity : collection) {
                 if (entity == null)
                     continue;
-                TransferExecutor.addPreparedStatementParameters(pst, transfer.updateValues(entity));
+                DBExecutor.addPreparedStatementParameters(pst, transfer.updateValues(entity));
                 pst.addBatch();
                 if (i % BATCH == 0) {
                     pst.executeBatch();
@@ -75,7 +71,6 @@ final class TransferExecutor {
             conn.rollback();
             throw e;
         } finally {
-            Util.close(pst);
             Util.close(conn);
         }
     }
@@ -84,14 +79,12 @@ final class TransferExecutor {
         if (unusable(collection, transfer))
             return;
         Connection conn = transfer.getConnection();
-        PreparedStatement pst = null;
-        try {
-            pst = conn.prepareStatement(transfer.delete_one);
+        try (PreparedStatement pst = conn.prepareStatement(transfer.delete_one)) {
             int i = 1;
             for (T entity : collection) {
                 if (entity == null)
                     continue;
-                TransferExecutor.addPreparedStatementParameters(pst, transfer.deleteValues(entity));
+                DBExecutor.addPreparedStatementParameters(pst, transfer.deleteValues(entity));
                 pst.addBatch();
                 if (i % BATCH == 0) {
                     pst.executeBatch();
@@ -106,7 +99,6 @@ final class TransferExecutor {
             conn.rollback();
             throw e;
         } finally {
-            Util.close(pst);
             Util.close(conn);
         }
     }
@@ -115,15 +107,13 @@ final class TransferExecutor {
         if (collection == null || collection.size() == 0)
             return;
         Connection conn = transfer.getConnection();
-        PreparedStatement pst = null;
         ResultSet rsAuto = null;
-        try {
-            pst = conn.prepareStatement(transfer.insert_one, PreparedStatement.RETURN_GENERATED_KEYS);
+        try (PreparedStatement pst = conn.prepareStatement(transfer.insert_one, PreparedStatement.RETURN_GENERATED_KEYS)) {
             for (T entity : collection) {
                 if (entity == null)
                     continue;
                 SqlParameter[] parameters = transfer.insertValues(entity);
-                TransferExecutor.addPreparedStatementParameters(pst, parameters);
+                DBExecutor.addPreparedStatementParameters(pst, parameters);
                 pst.executeUpdate();
                 conn.commit();
                 if (transfer.autoIncrementCol != null) {//有自增列
@@ -144,8 +134,6 @@ final class TransferExecutor {
             conn.rollback();
             throw e;
         } finally {
-            Util.close(rsAuto);
-            Util.close(pst);
             Util.close(conn);
         }
     }
@@ -168,14 +156,15 @@ final class TransferExecutor {
     }
 
     //得到第一列、第一行的值
-    static Object queryScalar(Connection conn, String preparedSql, SqlParameter... parameters) throws SQLException {
+    static Object scalar(Connection conn, String preparedSql, SqlParameter... parameters) throws SQLException {
         Object v = null;
         ResultSet rs = null;
         PreparedStatement statement = null;
         try {
             statement = conn.prepareStatement(preparedSql);
-            TransferExecutor.addPreparedStatementParameters(statement, parameters);
+            DBExecutor.addPreparedStatementParameters(statement, parameters);
             rs = statement.executeQuery();
+            rs.setFetchSize(1);
             if (rs.next()) {
                 v = rs.getObject(1);
             }
@@ -206,7 +195,7 @@ final class TransferExecutor {
     static int executeUpdate(Connection connection, String preparedSql, SqlParameter... args) throws SQLException {
         int r;
         try (PreparedStatement pst = connection.prepareStatement(preparedSql)) {
-            TransferExecutor.addPreparedStatementParameters(pst, args);
+            DBExecutor.addPreparedStatementParameters(pst, args);
             r = pst.executeUpdate();
             connection.commit();
         } catch (SQLException e) {

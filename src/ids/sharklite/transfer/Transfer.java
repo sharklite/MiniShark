@@ -31,13 +31,13 @@ public class Transfer<E> extends BaseTransfer<E> {
         this.initializeConfig(config, tableName);
     }
 
-    public void initializeConfig(TransferConfig config) {
+    public final void initializeConfig(TransferConfig config) {
         this.dataSource = config.getDataSource();
         this.config = config;
         this.createSelf(eClassGet(), null);
     }
 
-    public void initializeConfig(TransferConfig config, String tableName) {
+    public final void initializeConfig(TransferConfig config, String tableName) {
         this.dataSource = config.getDataSource();
         this.config = config;
         this.createSelf(eClassGet(), tableName);
@@ -227,7 +227,7 @@ public class Transfer<E> extends BaseTransfer<E> {
 
     @Override
     public void insert(Collection<E> collection) throws SQLException {
-        TransferExecutor.insertBatch(collection, this);
+        DBExecutor.insertBatch(collection, this);
     }
 
     /**
@@ -242,7 +242,7 @@ public class Transfer<E> extends BaseTransfer<E> {
 
     @Override
     public void update(Collection<E> collection) throws SQLException {
-        TransferExecutor.updateBatch(collection, this);
+        DBExecutor.updateBatch(collection, this);
     }
 
     /**
@@ -257,7 +257,7 @@ public class Transfer<E> extends BaseTransfer<E> {
 
     @Override
     public void delete(Collection<E> collection) throws SQLException {
-        TransferExecutor.deleteBatch(collection, this);
+        DBExecutor.deleteBatch(collection, this);
     }
 
     /**
@@ -273,9 +273,10 @@ public class Transfer<E> extends BaseTransfer<E> {
         return l.isEmpty() ? null : l.get(0);
     }
 
+
     @Override
     public List<E> select(Collection<E> Collection) throws SQLException {
-        return TransferExecutor.selectBatch(Collection, this);
+        return DBExecutor.selectBatch(Collection, this);
     }
 
 
@@ -373,11 +374,11 @@ public class Transfer<E> extends BaseTransfer<E> {
 
 
     protected int executeUpdate(String preparedSql, SqlParameter... parameters) throws SQLException {
-        return TransferExecutor.executeUpdate(getConnection(), preparedSql, parameters);
+        return DBExecutor.executeUpdate(getConnection(), preparedSql, parameters);
     }
 
-    protected Object queryScalar(String preparedSql, SqlParameter... parameters) throws SQLException {
-        return TransferExecutor.queryScalar(getConnection(), preparedSql, parameters);
+    protected Object scalar(String preparedSql, SqlParameter... parameters) throws SQLException {
+        return DBExecutor.scalar(getConnection(), preparedSql, parameters);
     }
 
     private String wrap(String name) {

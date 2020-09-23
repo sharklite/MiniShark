@@ -2,7 +2,7 @@ package ids.sharklite.transfer;
 
 import java.sql.JDBCType;
 
-public class SqlParameter {
+public final class SqlParameter {
     private final Object value;
     private final int type;
 
