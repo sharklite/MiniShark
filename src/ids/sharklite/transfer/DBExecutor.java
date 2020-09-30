@@ -51,7 +51,7 @@ final class DBExecutor {
         if (unusable(collection, transfer))
             return;
         Connection conn = transfer.getConnection();
-        try (PreparedStatement pst = conn.prepareStatement(transfer.update_one);) {
+        try (PreparedStatement pst = conn.prepareStatement(transfer.update_one)) {
             int i = 1;
             for (T entity : collection) {
                 if (entity == null)
@@ -107,7 +107,7 @@ final class DBExecutor {
         if (collection == null || collection.size() == 0)
             return;
         Connection conn = transfer.getConnection();
-        ResultSet rsAuto = null;
+        ResultSet rsAuto;
         try (PreparedStatement pst = conn.prepareStatement(transfer.insert_one, PreparedStatement.RETURN_GENERATED_KEYS)) {
             for (T entity : collection) {
                 if (entity == null)
